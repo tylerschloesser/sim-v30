@@ -1,6 +1,7 @@
-import { ReactNode } from 'react'
+import type { ReactNode } from 'react'
 import { useImmer } from 'use-immer'
-import { AppState, AppStateContext } from './AppStateContext'
+import type { AppState } from './AppStateContext'
+import { AppStateContext } from './AppStateContext'
 
 const initialState: AppState = {
   tick: 0,
