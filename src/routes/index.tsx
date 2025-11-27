@@ -7,7 +7,7 @@ import {
 } from "../components/SizeObserver";
 import { WorldContainer, type Pointer } from "../components/WorldContainer";
 import { useAppState } from "../hooks/useAppState";
-import { addEntity } from "../state/AppStateContext";
+import { addEntity, connectEntities } from "../state/AppStateContext";
 import { createDefaultState } from "../state/AppState";
 
 const DRAG_THRESHOLD = 5;
@@ -42,9 +42,9 @@ function Index() {
     if (drag && e.nativeEvent.pointerId === drag.pointerId) {
       const deltaX = e.x - drag.startPointer.x;
       const deltaY = e.y - drag.startPointer.y;
-      updateState((d) => {
-        d.camera.x = drag.startCamera.x - deltaX;
-        d.camera.y = drag.startCamera.y - deltaY;
+      updateState((draft) => {
+        draft.camera.x = drag.startCamera.x - deltaX;
+        draft.camera.y = drag.startCamera.y - deltaY;
       });
     }
   };
@@ -77,13 +77,15 @@ function Index() {
         const worldX = e.x - e.size.width / 2 + state.camera.x;
         const worldY = e.y - e.size.height / 2 + state.camera.y;
 
-        updateState((d) => {
-          addEntity(d, {
+        updateState((draft) => {
+          const newId = String(draft.nextEntityId);
+          addEntity(draft, {
             position: { x: worldX, y: worldY },
             radius: 16,
             color: { h: Math.random() * 360, s: 100, l: 50 },
             connections: {},
           });
+          connectEntities(draft, newId, "0");
         });
       }
 
