@@ -1,12 +1,12 @@
-import { createContext } from 'react'
+import { createContext } from "react";
 
 export interface AppState {
-  tick: number
+  tick: number;
 }
 
 export type AppStateContextType = {
-  state: AppState
-  updateState: (updater: (draft: AppState) => void) => void
-}
+  state: AppState;
+  updateState: (updater: (draft: AppState) => void) => void;
+};
 
-export const AppStateContext = createContext<AppStateContextType | null>(null)
+export const AppStateContext = createContext<AppStateContextType | null>(null);
