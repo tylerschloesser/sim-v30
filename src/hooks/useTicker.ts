@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import { AppState } from '../state/AppState'
+import { AppState } from '../state/AppStateContext'
 
 const TICK_RATE = 60 // ticks per second
 const MS_PER_TICK = 1000 / TICK_RATE

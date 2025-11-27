@@ -1,10 +1,11 @@
 import { createRootRoute, Link, Outlet } from '@tanstack/react-router'
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
-import { AppStateProvider, useAppState } from '../state/AppState'
+import { AppStateProvider } from '../state/AppState'
+import { useAppState } from '../hooks/useAppState'
 import { useTicker } from '../hooks/useTicker'
 
 function RootLayout() {
-  const { updateState } = useAppState()
+  const { state, updateState } = useAppState()
   useTicker(updateState)
 
   return (
@@ -16,6 +17,7 @@ function RootLayout() {
         <Link to="/about" className="[&.active]:font-bold">
           About
         </Link>
+        <span className="ml-auto">{state.tick}</span>
       </div>
       <hr />
       <Outlet />
