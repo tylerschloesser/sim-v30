@@ -13,7 +13,7 @@ function RootLayout() {
     <>
       <div className="min-h-screen flex flex-col">
         <Nav />
-        <div className="flex-1">
+        <div className="flex-1 relative">
           <Outlet />
         </div>
       </div>

@@ -30,7 +30,7 @@ export function ContainerObserver({ children }: ContainerObserverProps) {
   }, []);
 
   return (
-    <div ref={ref} style={{ width: "100%", height: "100%" }}>
+    <div ref={ref} className="absolute inset-0">
       {children(size)}
     </div>
   );
