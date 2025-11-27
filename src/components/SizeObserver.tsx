@@ -5,11 +5,11 @@ export interface Size {
   height: number;
 }
 
-interface ContainerObserverProps {
+interface SizeObserverProps {
   children: (size: Size) => ReactNode;
 }
 
-export function ContainerObserver({ children }: ContainerObserverProps) {
+export function SizeObserver({ children }: SizeObserverProps) {
   const ref = useRef<HTMLDivElement>(null);
   const [size, setSize] = useState<Size>({ width: 0, height: 0 });
 
