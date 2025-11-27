@@ -5,8 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Commands
 
 - **Package manager:** Use `bun` instead of `npm`
-- **Type check:** `bun tsc -b` (project uses references, so `--noEmit` doesn't work)
-- **Lint:** `bun run lint`
+- **Check:** `bun run check` - Run after all code changes (formats, lints, type checks)
 - **Build:** `bun run build`
 - **Dev server:** Do not run `bun run dev` yourself - user manages this
 
