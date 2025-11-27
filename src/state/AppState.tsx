@@ -2,8 +2,10 @@ import type { ReactNode } from "react";
 import { useImmer } from "use-immer";
 import type { AppState } from "./AppStateContext";
 import { addEntity, AppStateContext } from "./AppStateContext";
+import { loadState } from "./persistence";
+import { usePersistence } from "../hooks/usePersistence";
 
-function createInitialState(): AppState {
+function createDefaultState(): AppState {
   const state: AppState = {
     tick: 0,
     camera: { x: 0, y: 0 },
@@ -20,10 +22,18 @@ function createInitialState(): AppState {
   return state;
 }
 
+function createInitialState(): AppState {
+  const loaded = loadState();
+  if (loaded) return loaded;
+  return createDefaultState();
+}
+
 const initialState = createInitialState();
 
 export function AppStateProvider({ children }: { children: ReactNode }) {
   const [state, updateState] = useImmer(initialState);
+
+  usePersistence(state);
 
   return (
     <AppStateContext.Provider value={{ state, updateState }}>

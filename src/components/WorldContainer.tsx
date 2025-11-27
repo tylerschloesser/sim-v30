@@ -35,8 +35,12 @@ export function WorldContainer({
       }
     : null;
 
-  const gridX = Math.floor((scaledCamera.x - size.width / 2) / cellSize) * cellSize - cellSize;
-  const gridY = Math.floor((scaledCamera.y - size.height / 2) / cellSize) * cellSize - cellSize;
+  const gridX =
+    Math.floor((scaledCamera.x - size.width / 2) / cellSize) * cellSize -
+    cellSize;
+  const gridY =
+    Math.floor((scaledCamera.y - size.height / 2) / cellSize) * cellSize -
+    cellSize;
 
   return (
     <svg className="w-full h-full">
@@ -47,7 +51,12 @@ export function WorldContainer({
           height={cellSize}
           patternUnits="userSpaceOnUse"
         >
-          <circle cx={cellSize / 2} cy={cellSize / 2} r={1.5 * scale} fill="#ccc" />
+          <circle
+            cx={cellSize / 2}
+            cy={cellSize / 2}
+            r={1.5 * scale}
+            fill="#ccc"
+          />
         </pattern>
       </defs>
       <g
@@ -70,7 +79,12 @@ export function WorldContainer({
           />
         ))}
         {pointerWorld && (
-          <circle cx={pointerWorld.x} cy={pointerWorld.y} r={cellSize / 2} fill="red" />
+          <circle
+            cx={pointerWorld.x}
+            cy={pointerWorld.y}
+            r={cellSize / 2}
+            fill="red"
+          />
         )}
       </g>
     </svg>

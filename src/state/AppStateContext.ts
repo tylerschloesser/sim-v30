@@ -1,34 +1,41 @@
 import { createContext } from "react";
+import { z } from "zod";
 
-export interface Camera {
-  x: number;
-  y: number;
-}
+export const CameraSchema = z.object({
+  x: z.number(),
+  y: z.number(),
+});
 
-export interface Position {
-  x: number;
-  y: number;
-}
+export const PositionSchema = z.object({
+  x: z.number(),
+  y: z.number(),
+});
 
-export interface HSL {
-  h: number;
-  s: number;
-  l: number;
-}
+export const HSLSchema = z.object({
+  h: z.number(),
+  s: z.number(),
+  l: z.number(),
+});
 
-export interface Entity {
-  id: string;
-  position: Position;
-  radius: number;
-  color: HSL;
-}
+export const EntitySchema = z.object({
+  id: z.string(),
+  position: PositionSchema,
+  radius: z.number(),
+  color: HSLSchema,
+});
 
-export interface AppState {
-  tick: number;
-  camera: Camera;
-  entities: Record<string, Entity>;
-  nextEntityId: number;
-}
+export const AppStateSchema = z.object({
+  tick: z.number(),
+  camera: CameraSchema,
+  entities: z.record(z.string(), EntitySchema),
+  nextEntityId: z.number(),
+});
+
+export type Camera = z.infer<typeof CameraSchema>;
+export type Position = z.infer<typeof PositionSchema>;
+export type HSL = z.infer<typeof HSLSchema>;
+export type Entity = z.infer<typeof EntitySchema>;
+export type AppState = z.infer<typeof AppStateSchema>;
 
 export type AppStateContextType = {
   state: AppState;
@@ -39,7 +46,7 @@ export const AppStateContext = createContext<AppStateContextType | null>(null);
 
 export function createEntity(
   state: AppState,
-  props: Omit<Entity, "id">
+  props: Omit<Entity, "id">,
 ): Entity {
   const id = String(state.nextEntityId);
   return { id, ...props };
