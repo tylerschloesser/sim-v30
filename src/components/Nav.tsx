@@ -5,7 +5,7 @@ export function Nav() {
   const { state } = useAppState();
 
   return (
-    <div className="p-2 flex gap-2">
+    <div className="p-2 flex gap-2 border-b">
       <Link to="/" className="[&.active]:font-bold">
         Home
       </Link>

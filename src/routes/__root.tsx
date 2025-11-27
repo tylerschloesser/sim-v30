@@ -12,7 +12,6 @@ function RootLayout() {
   return (
     <>
       <Nav />
-      <hr />
       <Outlet />
       <TanStackRouterDevtools />
     </>
