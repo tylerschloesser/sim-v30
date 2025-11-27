@@ -6,7 +6,6 @@ import {
 } from "../components/SizeObserver";
 import { WorldContainer, type Pointer } from "../components/WorldContainer";
 import { useAppState } from "../hooks/useAppState";
-import { MiniMap } from "../components/MiniMap";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -80,7 +79,6 @@ function Index() {
       >
         {(size) => <WorldContainer size={size} pointer={pointer} />}
       </SizeObserver>
-      <MiniMap />
     </>
   );
 }
