@@ -68,7 +68,11 @@ export function SizeObserver({
       };
     };
 
-    const handleDown = (e: PointerEvent) => onPointerDown?.(transform(e));
+    const handleDown = (e: PointerEvent) => {
+      if (e.target instanceof Element && ref.current?.contains(e.target)) {
+        onPointerDown?.(transform(e));
+      }
+    };
     const handleMove = (e: PointerEvent) => onPointerMove?.(transform(e));
     const handleUp = (e: PointerEvent) => onPointerUp?.(transform(e));
     const handleEnter = (e: PointerEvent) => onPointerEnter?.(transform(e));
