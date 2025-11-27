@@ -1,15 +1,39 @@
-import { useRef, useState, useLayoutEffect, type ReactNode } from "react";
+import {
+  useRef,
+  useState,
+  useLayoutEffect,
+  useEffect,
+  type ReactNode,
+} from "react";
 
 export interface Size {
   width: number;
   height: number;
 }
 
-interface SizeObserverProps {
-  children: (size: Size) => ReactNode;
+export interface CanvasPointerEvent {
+  x: number;
+  y: number;
+  nativeEvent: PointerEvent;
 }
 
-export function SizeObserver({ children }: SizeObserverProps) {
+interface SizeObserverProps {
+  children: (size: Size) => ReactNode;
+  onPointerDown?: (e: CanvasPointerEvent) => void;
+  onPointerMove?: (e: CanvasPointerEvent) => void;
+  onPointerUp?: (e: CanvasPointerEvent) => void;
+  onPointerEnter?: (e: CanvasPointerEvent) => void;
+  onPointerLeave?: (e: CanvasPointerEvent) => void;
+}
+
+export function SizeObserver({
+  children,
+  onPointerDown,
+  onPointerMove,
+  onPointerUp,
+  onPointerEnter,
+  onPointerLeave,
+}: SizeObserverProps) {
   const ref = useRef<HTMLDivElement>(null);
   const [size, setSize] = useState<Size>({ width: 0, height: 0 });
 
@@ -28,6 +52,40 @@ export function SizeObserver({ children }: SizeObserverProps) {
     observer.observe(el);
     return () => observer.disconnect();
   }, []);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    const transform = (e: PointerEvent): CanvasPointerEvent => {
+      const rect = el.getBoundingClientRect();
+      return {
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top,
+        nativeEvent: e,
+      };
+    };
+
+    const handleDown = (e: PointerEvent) => onPointerDown?.(transform(e));
+    const handleMove = (e: PointerEvent) => onPointerMove?.(transform(e));
+    const handleUp = (e: PointerEvent) => onPointerUp?.(transform(e));
+    const handleEnter = (e: PointerEvent) => onPointerEnter?.(transform(e));
+    const handleLeave = (e: PointerEvent) => onPointerLeave?.(transform(e));
+
+    document.addEventListener("pointerdown", handleDown);
+    document.addEventListener("pointermove", handleMove);
+    document.addEventListener("pointerup", handleUp);
+    el.addEventListener("pointerenter", handleEnter);
+    el.addEventListener("pointerleave", handleLeave);
+
+    return () => {
+      document.removeEventListener("pointerdown", handleDown);
+      document.removeEventListener("pointermove", handleMove);
+      document.removeEventListener("pointerup", handleUp);
+      el.removeEventListener("pointerenter", handleEnter);
+      el.removeEventListener("pointerleave", handleLeave);
+    };
+  }, [onPointerDown, onPointerMove, onPointerUp, onPointerEnter, onPointerLeave]);
 
   return (
     <div ref={ref} className="absolute inset-0">
