@@ -31,7 +31,7 @@ export function ContainerObserver({ children }: ContainerObserverProps) {
 
   return (
     <div ref={ref} className="absolute inset-0">
-      {children(size)}
+      {size.width > 0 && size.height > 0 && children(size)}
     </div>
   );
 }
