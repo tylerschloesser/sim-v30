@@ -1,9 +1,6 @@
 import { Link } from "@tanstack/react-router";
-import { useAppState } from "../hooks/useAppState";
 
 export function Nav() {
-  const { state } = useAppState();
-
   return (
     <div className="p-2 flex gap-2 border-b sticky top-0 bg-white">
       <Link to="/" className="[&.active]:font-bold">
@@ -12,7 +9,6 @@ export function Nav() {
       <Link to="/about" className="[&.active]:font-bold">
         About
       </Link>
-      <span className="ml-auto font-mono select-none">{state.tick}</span>
     </div>
   );
 }

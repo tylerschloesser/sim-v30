@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useImmer } from "use-immer";
+import { Nav } from "../components/Nav";
 import {
   SizeObserver,
   type CanvasPointerEvent,
@@ -89,16 +90,29 @@ function Index() {
   };
 
   return (
-    <>
-      <SizeObserver
-        onPointerEnter={handlePointerEnter}
-        onPointerMove={handlePointerMove}
-        onPointerLeave={handlePointerLeave}
-        onPointerDown={handlePointerDown}
-        onPointerUp={handlePointerUp}
-      >
-        {(size) => <WorldContainer size={size} pointer={pointer} />}
-      </SizeObserver>
-    </>
+    <div className="h-dvh w-dvw flex flex-col">
+      <Nav />
+      <div className="flex-1 relative">
+        <SizeObserver
+          onPointerEnter={handlePointerEnter}
+          onPointerMove={handlePointerMove}
+          onPointerLeave={handlePointerLeave}
+          onPointerDown={handlePointerDown}
+          onPointerUp={handlePointerUp}
+        >
+          {(size) => <WorldContainer size={size} pointer={pointer} />}
+        </SizeObserver>
+      </div>
+      <BottomBar />
+    </div>
+  );
+}
+
+function BottomBar() {
+  const { state } = useAppState();
+  return (
+    <div className="p-2 flex border-t">
+      <span className="font-mono select-none text-xs">{state.tick}</span>
+    </div>
   );
 }
