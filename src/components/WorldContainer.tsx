@@ -10,47 +10,59 @@ export interface Pointer {
 interface WorldContainerProps {
   size: Size;
   pointer: Pointer | null;
+  scale?: number;
 }
 
-export function WorldContainer({ size, pointer }: WorldContainerProps) {
+const BASE_CELL_SIZE = 32;
+
+export function WorldContainer({
+  size,
+  pointer,
+  scale = 1,
+}: WorldContainerProps) {
   const { state } = useAppState();
   const { camera } = state;
 
+  const cellSize = BASE_CELL_SIZE * scale;
+  const patternId = `dot-grid-${scale}`;
+
+  const scaledCamera = { x: camera.x * scale, y: camera.y * scale };
+
   const pointerWorld = pointer
     ? {
-        x: pointer.x - size.width / 2 + camera.x,
-        y: pointer.y - size.height / 2 + camera.y,
+        x: pointer.x - size.width / 2 + scaledCamera.x,
+        y: pointer.y - size.height / 2 + scaledCamera.y,
       }
     : null;
 
-  const gridX = Math.floor((camera.x - size.width / 2) / 32) * 32 - 32;
-  const gridY = Math.floor((camera.y - size.height / 2) / 32) * 32 - 32;
+  const gridX = Math.floor((scaledCamera.x - size.width / 2) / cellSize) * cellSize - cellSize;
+  const gridY = Math.floor((scaledCamera.y - size.height / 2) / cellSize) * cellSize - cellSize;
 
   return (
     <svg className="w-full h-full">
       <defs>
         <pattern
-          id="dot-grid"
-          width="32"
-          height="32"
+          id={patternId}
+          width={cellSize}
+          height={cellSize}
           patternUnits="userSpaceOnUse"
         >
-          <circle cx="16" cy="16" r="1.5" fill="#ccc" />
+          <circle cx={cellSize / 2} cy={cellSize / 2} r={1.5 * scale} fill="#ccc" />
         </pattern>
       </defs>
       <g
-        transform={`translate(${size.width / 2 - camera.x}, ${size.height / 2 - camera.y})`}
+        transform={`translate(${size.width / 2 - scaledCamera.x}, ${size.height / 2 - scaledCamera.y})`}
       >
         <rect
           x={gridX}
           y={gridY}
-          width={size.width + 64}
-          height={size.height + 64}
-          fill="url(#dot-grid)"
+          width={size.width + cellSize * 2}
+          height={size.height + cellSize * 2}
+          fill={`url(#${patternId})`}
         />
-        <circle cx={0} cy={0} r={32} fill="blue" />
+        <circle cx={0} cy={0} r={cellSize} fill="blue" />
         {pointerWorld && (
-          <circle cx={pointerWorld.x} cy={pointerWorld.y} r={16} fill="red" />
+          <circle cx={pointerWorld.x} cy={pointerWorld.y} r={cellSize / 2} fill="red" />
         )}
       </g>
     </svg>

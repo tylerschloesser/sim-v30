@@ -6,6 +6,7 @@ import {
 } from "../components/SizeObserver";
 import { WorldContainer, type Pointer } from "../components/WorldContainer";
 import { useAppState } from "../hooks/useAppState";
+import { MiniMap } from "../components/MiniMap";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -69,14 +70,17 @@ function Index() {
   };
 
   return (
-    <SizeObserver
-      onPointerEnter={handlePointerEnter}
-      onPointerMove={handlePointerMove}
-      onPointerLeave={handlePointerLeave}
-      onPointerDown={handlePointerDown}
-      onPointerUp={handlePointerUp}
-    >
-      {(size) => <WorldContainer size={size} pointer={pointer} />}
-    </SizeObserver>
+    <>
+      <SizeObserver
+        onPointerEnter={handlePointerEnter}
+        onPointerMove={handlePointerMove}
+        onPointerLeave={handlePointerLeave}
+        onPointerDown={handlePointerDown}
+        onPointerUp={handlePointerUp}
+      >
+        {(size) => <WorldContainer size={size} pointer={pointer} />}
+      </SizeObserver>
+      <MiniMap />
+    </>
   );
 }
