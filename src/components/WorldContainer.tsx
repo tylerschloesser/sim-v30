@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import type { Size } from "./SizeObserver";
 import { useAppState } from "../hooks/useAppState";
 
@@ -14,6 +15,14 @@ interface WorldContainerProps {
 }
 
 const BASE_CELL_SIZE = 32;
+
+interface ConnectionLine {
+  id: string;
+  x1: number;
+  y1: number;
+  x2: number;
+  y2: number;
+}
 
 export function WorldContainer({
   size,
@@ -41,6 +50,35 @@ export function WorldContainer({
   const gridY =
     Math.floor((scaledCamera.y - size.height / 2) / cellSize) * cellSize -
     cellSize;
+
+  const connectionLines = useMemo(() => {
+    const lines: ConnectionLine[] = [];
+    const seen = new Set<string>();
+
+    for (const entity of Object.values(state.entities)) {
+      for (const connectedId of Object.keys(entity.connections)) {
+        const pairId =
+          entity.id < connectedId
+            ? `${entity.id}-${connectedId}`
+            : `${connectedId}-${entity.id}`;
+
+        if (seen.has(pairId)) continue;
+        seen.add(pairId);
+
+        const other = state.entities[connectedId];
+        if (!other) continue;
+
+        lines.push({
+          id: pairId,
+          x1: entity.position.x,
+          y1: entity.position.y,
+          x2: other.position.x,
+          y2: other.position.y,
+        });
+      }
+    }
+    return lines;
+  }, [state.entities]);
 
   return (
     <svg className="w-full h-full">
@@ -76,6 +114,17 @@ export function WorldContainer({
             cy={entity.position.y * scale}
             r={entity.radius * scale}
             fill={`hsl(${entity.color.h}, ${entity.color.s}%, ${entity.color.l}%)`}
+          />
+        ))}
+        {connectionLines.map((line) => (
+          <line
+            key={line.id}
+            x1={line.x1 * scale}
+            y1={line.y1 * scale}
+            x2={line.x2 * scale}
+            y2={line.y2 * scale}
+            stroke="#000"
+            strokeWidth={2 * scale}
           />
         ))}
         {pointerWorld && (
