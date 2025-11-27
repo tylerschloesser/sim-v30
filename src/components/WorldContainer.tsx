@@ -6,10 +6,10 @@ interface WorldContainerProps {
 }
 
 export function WorldContainer({ size }: WorldContainerProps) {
-  const { state } = useAppState();
+  const { state: _ } = useAppState();
   return (
-    <div className="w-full h-full">
-      {size.width}x{size.height} | tick: {state.tick} | camera: {state.camera.x},{state.camera.y}
-    </div>
+    <svg className="w-full h-full">
+      <circle cx={size.width / 2} cy={size.height / 2} r={32} fill="blue" />
+    </svg>
   );
 }
