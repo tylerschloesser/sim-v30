@@ -14,10 +14,19 @@ interface WorldContainerProps {
 
 export function WorldContainer({ size, pointer }: WorldContainerProps) {
   const { state: _ } = useAppState();
+
+  const pointerWorld = pointer
+    ? { x: pointer.x - size.width / 2, y: pointer.y - size.height / 2 }
+    : null;
+
   return (
     <svg className="w-full h-full">
-      <circle cx={size.width / 2} cy={size.height / 2} r={32} fill="blue" />
-      {pointer && <circle cx={pointer.x} cy={pointer.y} r={16} fill="red" />}
+      <g transform={`translate(${size.width / 2}, ${size.height / 2})`}>
+        <circle cx={0} cy={0} r={32} fill="blue" />
+        {pointerWorld && (
+          <circle cx={pointerWorld.x} cy={pointerWorld.y} r={16} fill="red" />
+        )}
+      </g>
     </svg>
   );
 }
