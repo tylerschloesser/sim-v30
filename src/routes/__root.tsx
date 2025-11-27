@@ -17,7 +17,7 @@ function RootLayout() {
         <Link to="/about" className="[&.active]:font-bold">
           About
         </Link>
-        <span className="ml-auto font-mono">{state.tick}</span>
+        <span className="ml-auto font-mono select-none">{state.tick}</span>
       </div>
       <hr />
       <Outlet />
