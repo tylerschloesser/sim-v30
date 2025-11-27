@@ -5,6 +5,8 @@ import { useAppState } from "../hooks/useAppState";
 import { useTicker } from "../hooks/useTicker";
 import { Nav } from "../components/Nav";
 
+const SHOW_ROUTER_DEVTOOLS = false;
+
 function RootLayout() {
   const { updateState } = useAppState();
   useTicker(updateState);
@@ -17,7 +19,7 @@ function RootLayout() {
           <Outlet />
         </div>
       </div>
-      <TanStackRouterDevtools />
+      {SHOW_ROUTER_DEVTOOLS && <TanStackRouterDevtools />}
     </>
   );
 }
