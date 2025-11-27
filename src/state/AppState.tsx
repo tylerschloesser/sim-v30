@@ -17,6 +17,7 @@ export function createDefaultState(): AppState {
     position: { x: 0, y: 0 },
     radius: 32,
     color: { h: 220, s: 100, l: 50 },
+    connections: {},
   });
 
   return state;

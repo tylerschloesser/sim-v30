@@ -82,6 +82,7 @@ function Index() {
             position: { x: worldX, y: worldY },
             radius: 16,
             color: { h: Math.random() * 360, s: 100, l: 50 },
+            connections: {},
           });
         });
       }

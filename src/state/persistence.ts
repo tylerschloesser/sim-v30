@@ -1,5 +1,5 @@
 import type { AppState } from "./AppStateContext";
-import { AppStateSchema } from "./AppStateContext";
+import { AppStateSchema, validateEntities } from "./AppStateContext";
 
 const STORAGE_KEY = "sim-v30-app-state";
 
@@ -21,6 +21,11 @@ export function loadState(): AppState | null {
     const result = AppStateSchema.safeParse(JSON.parse(json));
     if (!result.success) {
       console.warn("Invalid state in localStorage:", result.error.issues);
+      localStorage.removeItem(STORAGE_KEY);
+      return null;
+    }
+    if (!validateEntities(result.data)) {
+      console.warn("Invalid entity connections in localStorage");
       localStorage.removeItem(STORAGE_KEY);
       return null;
     }

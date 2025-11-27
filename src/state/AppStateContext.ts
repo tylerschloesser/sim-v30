@@ -22,6 +22,7 @@ export const EntitySchema = z.strictObject({
   position: PositionSchema,
   radius: z.number(),
   color: HSLSchema,
+  connections: z.record(z.string(), z.literal(true)),
 });
 
 export const AppStateSchema = z.strictObject({
@@ -56,4 +57,45 @@ export function addEntity(state: AppState, props: Omit<Entity, "id">): void {
   const entity = createEntity(state, props);
   state.entities[entity.id] = entity;
   state.nextEntityId++;
+}
+
+export function connectEntities(
+  state: AppState,
+  idA: string,
+  idB: string,
+): void {
+  const entityA = state.entities[idA];
+  const entityB = state.entities[idB];
+  if (entityA && entityB && idA !== idB) {
+    entityA.connections[idB] = true;
+    entityB.connections[idA] = true;
+  }
+}
+
+export function disconnectEntities(
+  state: AppState,
+  idA: string,
+  idB: string,
+): void {
+  const entityA = state.entities[idA];
+  const entityB = state.entities[idB];
+  if (entityA) delete entityA.connections[idB];
+  if (entityB) delete entityB.connections[idA];
+}
+
+export function validateEntities(state: AppState): boolean {
+  for (const [id, entity] of Object.entries(state.entities)) {
+    for (const connectedId of Object.keys(entity.connections)) {
+      // No self-connections
+      if (connectedId === id) return false;
+
+      // Connected entity must exist
+      const connectedEntity = state.entities[connectedId];
+      if (!connectedEntity) return false;
+
+      // Connection must be bidirectional
+      if (!connectedEntity.connections[id]) return false;
+    }
+  }
+  return true;
 }
