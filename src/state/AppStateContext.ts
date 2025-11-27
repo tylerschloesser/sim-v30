@@ -10,11 +10,17 @@ export interface Position {
   y: number;
 }
 
+export interface HSL {
+  h: number;
+  s: number;
+  l: number;
+}
+
 export interface Entity {
   id: string;
   position: Position;
   radius: number;
-  color: string;
+  color: HSL;
 }
 
 export interface AppState {

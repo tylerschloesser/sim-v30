@@ -66,7 +66,7 @@ export function WorldContainer({
             cx={entity.position.x * scale}
             cy={entity.position.y * scale}
             r={entity.radius * scale}
-            fill={entity.color}
+            fill={`hsl(${entity.color.h}, ${entity.color.s}%, ${entity.color.l}%)`}
           />
         ))}
         {pointerWorld && (

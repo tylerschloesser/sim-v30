@@ -14,7 +14,7 @@ function createInitialState(): AppState {
   addEntity(state, {
     position: { x: 0, y: 0 },
     radius: 32,
-    color: "blue",
+    color: { h: 220, s: 100, l: 50 },
   });
 
   return state;
