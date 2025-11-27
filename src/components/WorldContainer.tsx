@@ -60,7 +60,15 @@ export function WorldContainer({
           height={size.height + cellSize * 2}
           fill={`url(#${patternId})`}
         />
-        <circle cx={0} cy={0} r={cellSize} fill="blue" />
+        {Object.values(state.entities).map((entity) => (
+          <circle
+            key={entity.id}
+            cx={entity.position.x * scale}
+            cy={entity.position.y * scale}
+            r={entity.radius * scale}
+            fill={entity.color}
+          />
+        ))}
         {pointerWorld && (
           <circle cx={pointerWorld.x} cy={pointerWorld.y} r={cellSize / 2} fill="red" />
         )}
