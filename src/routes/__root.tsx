@@ -11,8 +11,12 @@ function RootLayout() {
 
   return (
     <>
-      <Nav />
-      <Outlet />
+      <div className="min-h-screen flex flex-col">
+        <Nav />
+        <div className="flex-1">
+          <Outlet />
+        </div>
+      </div>
       <TanStackRouterDevtools />
     </>
   );
