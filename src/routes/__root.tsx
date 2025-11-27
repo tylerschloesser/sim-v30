@@ -1,12 +1,12 @@
-import { createRootRoute, Link, Outlet } from '@tanstack/react-router'
-import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
-import { AppStateProvider } from '../state/AppState'
-import { useAppState } from '../hooks/useAppState'
-import { useTicker } from '../hooks/useTicker'
+import { createRootRoute, Link, Outlet } from "@tanstack/react-router";
+import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
+import { AppStateProvider } from "../state/AppState";
+import { useAppState } from "../hooks/useAppState";
+import { useTicker } from "../hooks/useTicker";
 
 function RootLayout() {
-  const { state, updateState } = useAppState()
-  useTicker(updateState)
+  const { state, updateState } = useAppState();
+  useTicker(updateState);
 
   return (
     <>
@@ -17,13 +17,13 @@ function RootLayout() {
         <Link to="/about" className="[&.active]:font-bold">
           About
         </Link>
-        <span className="ml-auto">{state.tick}</span>
+        <span className="ml-auto font-mono">{state.tick}</span>
       </div>
       <hr />
       <Outlet />
       <TanStackRouterDevtools />
     </>
-  )
+  );
 }
 
 export const Route = createRootRoute({
@@ -32,4 +32,4 @@ export const Route = createRootRoute({
       <RootLayout />
     </AppStateProvider>
   ),
-})
+});
