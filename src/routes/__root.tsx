@@ -1,9 +1,10 @@
 import { createRootRoute, Link, Outlet } from '@tanstack/react-router'
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
+import { AppStateProvider } from '../state/AppState'
 
 export const Route = createRootRoute({
   component: () => (
-    <>
+    <AppStateProvider>
       <div className="p-2 flex gap-2">
         <Link to="/" className="[&.active]:font-bold">
           Home
@@ -15,6 +16,6 @@ export const Route = createRootRoute({
       <hr />
       <Outlet />
       <TanStackRouterDevtools />
-    </>
+    </AppStateProvider>
   ),
 })
