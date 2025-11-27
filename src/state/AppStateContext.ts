@@ -1,30 +1,30 @@
 import { createContext } from "react";
 import { z } from "zod";
 
-export const CameraSchema = z.object({
+export const CameraSchema = z.strictObject({
   x: z.number(),
   y: z.number(),
 });
 
-export const PositionSchema = z.object({
+export const PositionSchema = z.strictObject({
   x: z.number(),
   y: z.number(),
 });
 
-export const HSLSchema = z.object({
+export const HSLSchema = z.strictObject({
   h: z.number(),
   s: z.number(),
   l: z.number(),
 });
 
-export const EntitySchema = z.object({
+export const EntitySchema = z.strictObject({
   id: z.string(),
   position: PositionSchema,
   radius: z.number(),
   color: HSLSchema,
 });
 
-export const AppStateSchema = z.object({
+export const AppStateSchema = z.strictObject({
   tick: z.number(),
   camera: CameraSchema,
   entities: z.record(z.string(), EntitySchema),
