@@ -4,6 +4,7 @@ import {
   useLayoutEffect,
   useEffect,
   type ReactNode,
+  useMemo,
 } from "react";
 
 export interface Size {
@@ -36,7 +37,11 @@ export function SizeObserver({
   onPointerLeave,
 }: SizeObserverProps) {
   const ref = useRef<HTMLDivElement>(null);
-  const [size, setSize] = useState<Size>({ width: 0, height: 0 });
+
+  const [rect, setRect] = useState<DOMRectReadOnly>(new DOMRectReadOnly());
+  const size = useMemo(() => {
+    return { width: rect.width, height: rect.height };
+  }, [rect.width, rect.height]);
 
   useLayoutEffect(() => {
     const el = ref.current;
@@ -45,8 +50,7 @@ export function SizeObserver({
     const observer = new ResizeObserver((entries) => {
       const entry = entries[0];
       if (entry) {
-        const { width, height } = entry.contentRect;
-        setSize({ width, height });
+        setRect(entry.contentRect);
       }
     });
 
