@@ -25,7 +25,9 @@ export function WorldContainer({ size, pointer }: WorldContainerProps) {
 
   return (
     <svg className="w-full h-full">
-      <g transform={`translate(${size.width / 2 - camera.x}, ${size.height / 2 - camera.y})`}>
+      <g
+        transform={`translate(${size.width / 2 - camera.x}, ${size.height / 2 - camera.y})`}
+      >
         <circle cx={0} cy={0} r={32} fill="blue" />
         {pointerWorld && (
           <circle cx={pointerWorld.x} cy={pointerWorld.y} r={16} fill="red" />

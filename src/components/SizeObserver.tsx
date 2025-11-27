@@ -85,7 +85,13 @@ export function SizeObserver({
       el.removeEventListener("pointerenter", handleEnter);
       el.removeEventListener("pointerleave", handleLeave);
     };
-  }, [onPointerDown, onPointerMove, onPointerUp, onPointerEnter, onPointerLeave]);
+  }, [
+    onPointerDown,
+    onPointerMove,
+    onPointerUp,
+    onPointerEnter,
+    onPointerLeave,
+  ]);
 
   return (
     <div ref={ref} className="absolute inset-0">
