@@ -5,6 +5,7 @@ import { AppStateContext } from "./AppStateContext";
 
 const initialState: AppState = {
   tick: 0,
+  camera: { x: 0, y: 0 },
 };
 
 export function AppStateProvider({ children }: { children: ReactNode }) {

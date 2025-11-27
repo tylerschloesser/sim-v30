@@ -1,7 +1,13 @@
 import { createContext } from "react";
 
+export interface Camera {
+  x: number;
+  y: number;
+}
+
 export interface AppState {
   tick: number;
+  camera: Camera;
 }
 
 export type AppStateContextType = {
