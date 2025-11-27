@@ -5,7 +5,7 @@ import { addEntity, AppStateContext } from "./AppStateContext";
 import { loadState } from "./persistence";
 import { usePersistence } from "../hooks/usePersistence";
 
-function createDefaultState(): AppState {
+export function createDefaultState(): AppState {
   const state: AppState = {
     tick: 0,
     camera: { x: 0, y: 0 },

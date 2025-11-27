@@ -8,6 +8,7 @@ import {
 import { WorldContainer, type Pointer } from "../components/WorldContainer";
 import { useAppState } from "../hooks/useAppState";
 import { addEntity } from "../state/AppStateContext";
+import { createDefaultState } from "../state/AppState";
 
 const DRAG_THRESHOLD = 5;
 
@@ -109,10 +110,23 @@ function Index() {
 }
 
 function BottomBar() {
-  const { state } = useAppState();
+  const { state, updateState } = useAppState();
+
+  const handleReset = () => {
+    if (window.confirm("Reset to initial state?")) {
+      updateState(() => createDefaultState());
+    }
+  };
+
   return (
-    <div className="p-2 flex border-t">
+    <div className="p-2 flex border-t items-center justify-between">
       <span className="font-mono select-none text-xs">{state.tick}</span>
+      <button
+        onClick={handleReset}
+        className="text-xs text-blue-600 hover:underline"
+      >
+        Reset
+      </button>
     </div>
   );
 }
