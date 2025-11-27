@@ -14,6 +14,7 @@ export interface Size {
 export interface CanvasPointerEvent {
   x: number;
   y: number;
+  size: Size;
   nativeEvent: PointerEvent;
 }
 
@@ -62,6 +63,7 @@ export function SizeObserver({
       return {
         x: e.clientX - rect.left,
         y: e.clientY - rect.top,
+        size,
         nativeEvent: e,
       };
     };
@@ -86,6 +88,7 @@ export function SizeObserver({
       el.removeEventListener("pointerleave", handleLeave);
     };
   }, [
+    size,
     onPointerDown,
     onPointerMove,
     onPointerUp,

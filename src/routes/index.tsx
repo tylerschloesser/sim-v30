@@ -6,6 +6,9 @@ import {
 } from "../components/SizeObserver";
 import { WorldContainer, type Pointer } from "../components/WorldContainer";
 import { useAppState } from "../hooks/useAppState";
+import { addEntity } from "../state/AppStateContext";
+
+const DRAG_THRESHOLD = 5;
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -64,6 +67,23 @@ function Index() {
 
   const handlePointerUp = (e: CanvasPointerEvent) => {
     if (drag && e.nativeEvent.pointerId === drag.pointerId) {
+      const deltaX = e.x - drag.startPointer.x;
+      const deltaY = e.y - drag.startPointer.y;
+      const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+
+      if (distance < DRAG_THRESHOLD) {
+        const worldX = e.x - e.size.width / 2 + state.camera.x;
+        const worldY = e.y - e.size.height / 2 + state.camera.y;
+
+        updateState((d) => {
+          addEntity(d, {
+            position: { x: worldX, y: worldY },
+            radius: 16,
+            color: { h: Math.random() * 360, s: 100, l: 50 },
+          });
+        });
+      }
+
       setDrag(null);
     }
   };
