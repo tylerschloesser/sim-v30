@@ -37,26 +37,10 @@ export function SizeObserver({
   onPointerLeave,
 }: SizeObserverProps) {
   const ref = useRef<HTMLDivElement>(null);
-
-  const [rect, setRect] = useState<DOMRectReadOnly>(new DOMRectReadOnly());
+  const rect = useRect(ref);
   const size = useMemo(() => {
     return { width: rect.width, height: rect.height };
   }, [rect.width, rect.height]);
-
-  useLayoutEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-
-    const observer = new ResizeObserver((entries) => {
-      const entry = entries[0];
-      if (entry) {
-        setRect(entry.contentRect);
-      }
-    });
-
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, []);
 
   useEffect(() => {
     const el = ref.current;
@@ -109,4 +93,23 @@ export function SizeObserver({
       {size.width > 0 && size.height > 0 && children(size)}
     </div>
   );
+}
+
+function useRect(ref: React.RefObject<HTMLDivElement | null>): DOMRectReadOnly {
+  const [rect, setRect] = useState<DOMRectReadOnly>(new DOMRectReadOnly());
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    const observer = new ResizeObserver((entries) => {
+      const entry = entries[0];
+      if (entry) {
+        setRect(entry.contentRect);
+      }
+    });
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+  return rect;
 }
