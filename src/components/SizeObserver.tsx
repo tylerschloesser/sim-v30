@@ -6,6 +6,7 @@ import {
   type ReactNode,
   useMemo,
 } from "react";
+import { invariant } from "../utils/invariant";
 
 export interface Size {
   width: number;
@@ -43,11 +44,11 @@ export function SizeObserver({
   }, [rect.width, rect.height]);
 
   useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
+    invariant(ref.current);
 
     const transform = (e: PointerEvent): CanvasPointerEvent => {
-      const rect = el.getBoundingClientRect();
+      invariant(ref.current);
+      const rect = ref.current.getBoundingClientRect();
       return {
         x: e.clientX - rect.left,
         y: e.clientY - rect.top,
@@ -69,15 +70,16 @@ export function SizeObserver({
     document.addEventListener("pointerdown", handleDown);
     document.addEventListener("pointermove", handleMove);
     document.addEventListener("pointerup", handleUp);
-    el.addEventListener("pointerenter", handleEnter);
-    el.addEventListener("pointerleave", handleLeave);
+    ref.current.addEventListener("pointerenter", handleEnter);
+    ref.current.addEventListener("pointerleave", handleLeave);
 
     return () => {
+      invariant(ref.current);
       document.removeEventListener("pointerdown", handleDown);
       document.removeEventListener("pointermove", handleMove);
       document.removeEventListener("pointerup", handleUp);
-      el.removeEventListener("pointerenter", handleEnter);
-      el.removeEventListener("pointerleave", handleLeave);
+      ref.current.removeEventListener("pointerenter", handleEnter);
+      ref.current.removeEventListener("pointerleave", handleLeave);
     };
   }, [
     size,
