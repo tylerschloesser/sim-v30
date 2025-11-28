@@ -5,7 +5,11 @@ import {
   SizeObserver,
   type CanvasPointerEvent,
 } from "../components/SizeObserver";
-import { WorldContainer, findEntityAtPoint, type Pointer } from "../components/WorldContainer";
+import {
+  WorldContainer,
+  findEntityAtPoint,
+  type Pointer,
+} from "../components/WorldContainer";
 import { useAppState } from "../hooks/useAppState";
 import { addEntity, connectEntities } from "../state/AppStateContext";
 import { createDefaultState } from "../state/createDefaultState";
@@ -87,7 +91,11 @@ function Index() {
 
         if (clickedEntityId) {
           updateState((draft) => {
-            draft.selectedEntityId = clickedEntityId;
+            if (draft.selectedEntityId === clickedEntityId) {
+              draft.selectedEntityId = null;
+            } else {
+              draft.selectedEntityId = clickedEntityId;
+            }
           });
         } else {
           updateState((draft) => {
