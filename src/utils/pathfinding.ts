@@ -30,6 +30,14 @@ function heuristic(x1: number, y1: number, x2: number, y2: number): number {
   return Math.max(Math.abs(x2 - x1), Math.abs(y2 - y1));
 }
 
+function hasEntityAt(
+  chunks: Record<string, Chunk>,
+  x: number,
+  y: number,
+): boolean {
+  return getEntityAtTile(chunks, x, y) !== null;
+}
+
 function isWalkable(
   chunks: Record<string, Chunk>,
   x: number,
@@ -101,6 +109,16 @@ export function findPath(
       // Check if tile is walkable
       if (!isWalkable(chunks, nx, ny, startTileId, endTileId)) {
         continue;
+      }
+
+      // For diagonal moves, check we're not cutting a corner
+      if (dir.dx !== 0 && dir.dy !== 0) {
+        if (
+          hasEntityAt(chunks, current.x + dir.dx, current.y) ||
+          hasEntityAt(chunks, current.x, current.y + dir.dy)
+        ) {
+          continue;
+        }
       }
 
       // Diagonal movement costs sqrt(2), cardinal costs 1

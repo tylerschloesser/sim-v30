@@ -2,7 +2,11 @@ import { useMemo } from "react";
 import type { Size } from "./SizeObserver";
 import { useAppState } from "../hooks/useAppState";
 import { BASE_TILE_SIZE } from "../constants";
-import { findEntityAtPoint, hasOverlappingEntity } from "../utils/world";
+import {
+  findEntityAtPoint,
+  hasOverlappingEntity,
+  wouldBlockConnection,
+} from "../utils/world";
 import { getEntityAtTile, getTileIdFromChunkIndex } from "../utils/chunks";
 import { parseTileId } from "../utils/tileId";
 import type { TileId } from "../utils/tileId";
@@ -106,10 +110,12 @@ export function WorldContainer({
 
   const previewOverlaps = useMemo(() => {
     if (!pointerWorld) return false;
-    return hasOverlappingEntity(chunks, {
-      x: Math.round(pointerWorld.x - 1),
-      y: Math.round(pointerWorld.y - 1),
-    });
+    const x = Math.round(pointerWorld.x - 1);
+    const y = Math.round(pointerWorld.y - 1);
+    return (
+      hasOverlappingEntity(chunks, { x, y }) ||
+      wouldBlockConnection(chunks, x, y)
+    );
   }, [pointerWorld, chunks]);
 
   // Get selected entity ID for entity stroke highlighting

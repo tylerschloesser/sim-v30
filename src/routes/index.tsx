@@ -8,7 +8,7 @@ import {
 } from "../components/SizeObserver";
 import { WorldContainer, type Pointer } from "../components/WorldContainer";
 import { BASE_TILE_SIZE } from "../constants";
-import { hasOverlappingEntity } from "../utils/world";
+import { hasOverlappingEntity, wouldBlockConnection } from "../utils/world";
 import { getEntityAtTile } from "../utils/chunks";
 import { useAppState } from "../hooks/useAppState";
 import { addEntity, connectTiles } from "../state/AppStateContext";
@@ -156,7 +156,8 @@ function Index() {
             !hasOverlappingEntity(chunks, {
               x: topLeftX,
               y: topLeftY,
-            })
+            }) &&
+            !wouldBlockConnection(chunks, topLeftX, topLeftY)
           ) {
             updateState((draft) => {
               addEntity(draft.world, {
