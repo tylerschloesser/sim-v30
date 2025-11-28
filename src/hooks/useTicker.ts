@@ -26,7 +26,7 @@ export function useTicker(updateState: UpdateState) {
       if (ticksToAdd > 0) {
         accumulatorRef.current -= ticksToAdd * MS_PER_TICK;
         updateState((draft) => {
-          draft.tick += ticksToAdd;
+          draft.world.tick += ticksToAdd;
         });
       }
 

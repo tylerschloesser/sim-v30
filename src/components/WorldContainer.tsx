@@ -12,7 +12,6 @@ export interface Pointer {
 interface WorldContainerProps {
   size: Size;
   pointer: Pointer | null;
-  selectedEntityId: string | null;
   scale?: number;
 }
 
@@ -43,11 +42,11 @@ interface ConnectionLine {
 export function WorldContainer({
   size,
   pointer,
-  selectedEntityId,
   scale = 1,
 }: WorldContainerProps) {
   const { state } = useAppState();
-  const { camera } = state;
+  const { world, selectedEntityId } = state;
+  const { camera, entities } = world;
 
   const cellSize = BASE_CELL_SIZE * scale;
   const patternId = `dot-grid-${scale}`;
@@ -79,7 +78,7 @@ export function WorldContainer({
     const lines: ConnectionLine[] = [];
     const seen = new Set<string>();
 
-    for (const entity of Object.values(state.entities)) {
+    for (const entity of Object.values(entities)) {
       for (const connectedId of Object.keys(entity.connections)) {
         const pairId =
           entity.id < connectedId
@@ -89,7 +88,7 @@ export function WorldContainer({
         if (seen.has(pairId)) continue;
         seen.add(pairId);
 
-        const other = state.entities[connectedId];
+        const other = entities[connectedId];
         if (!other) continue;
 
         lines.push({
@@ -102,12 +101,12 @@ export function WorldContainer({
       }
     }
     return lines;
-  }, [state.entities]);
+  }, [entities]);
 
   const hoverEntityId = useMemo(() => {
     if (!pointerWorld) return null;
-    return findEntityAtPoint(state.entities, pointerWorld);
-  }, [pointerWorld, state.entities]);
+    return findEntityAtPoint(entities, pointerWorld);
+  }, [pointerWorld, entities]);
 
   return (
     <svg className="w-full h-full">
@@ -136,7 +135,7 @@ export function WorldContainer({
           height={size.height + cellSize * 2}
           fill={`url(#${patternId})`}
         />
-        {Object.values(state.entities).map((entity) => (
+        {Object.values(entities).map((entity) => (
           <circle
             key={entity.id}
             cx={entity.position.x * scale}

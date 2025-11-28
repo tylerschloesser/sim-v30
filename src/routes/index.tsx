@@ -1,16 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
 import { useImmer } from "use-immer";
 import { Nav } from "../components/Nav";
 import {
   SizeObserver,
   type CanvasPointerEvent,
 } from "../components/SizeObserver";
-import {
-  WorldContainer,
-  findEntityAtPoint,
-  type Pointer,
-} from "../components/WorldContainer";
+import { WorldContainer, findEntityAtPoint, type Pointer } from "../components/WorldContainer";
 import { useAppState } from "../hooks/useAppState";
 import { addEntity, connectEntities } from "../state/AppStateContext";
 import { createDefaultState } from "../state/createDefaultState";
@@ -34,7 +29,6 @@ function Index() {
   const [pointer, setPointer] = useImmer<Pointer | null>(null);
 
   const [drag, setDrag] = useImmer<DragState | null>(null);
-  const [selectedEntityId, setSelectedEntityId] = useState<string | null>(null);
 
   const handlePointerEnter = (e: CanvasPointerEvent) => {
     setPointer({ x: e.x, y: e.y, id: e.nativeEvent.pointerId });
@@ -52,8 +46,8 @@ function Index() {
       const deltaX = e.x - drag.startPointer.x;
       const deltaY = e.y - drag.startPointer.y;
       updateState((draft) => {
-        draft.camera.x = drag.startCamera.x - deltaX;
-        draft.camera.y = drag.startCamera.y - deltaY;
+        draft.world.camera.x = drag.startCamera.x - deltaX;
+        draft.world.camera.y = drag.startCamera.y - deltaY;
       });
     }
   };
@@ -70,7 +64,7 @@ function Index() {
     if (!drag) {
       setDrag({
         startPointer: { x: e.x, y: e.y },
-        startCamera: { x: state.camera.x, y: state.camera.y },
+        startCamera: { x: state.world.camera.x, y: state.world.camera.y },
         pointerId: e.nativeEvent.pointerId,
       });
     }
@@ -83,26 +77,28 @@ function Index() {
       const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
 
       if (distance < DRAG_THRESHOLD) {
-        const worldX = e.x + state.camera.x;
-        const worldY = e.y + state.camera.y;
+        const worldX = e.x + state.world.camera.x;
+        const worldY = e.y + state.world.camera.y;
 
-        const clickedEntityId = findEntityAtPoint(state.entities, {
+        const clickedEntityId = findEntityAtPoint(state.world.entities, {
           x: worldX,
           y: worldY,
         });
 
         if (clickedEntityId) {
-          setSelectedEntityId(clickedEntityId);
+          updateState((draft) => {
+            draft.selectedEntityId = clickedEntityId;
+          });
         } else {
           updateState((draft) => {
-            const newId = String(draft.nextEntityId);
-            addEntity(draft, {
+            const newId = addEntity(draft.world, {
               position: { x: worldX, y: worldY },
               radius: 16,
               color: { h: Math.random() * 360, s: 100, l: 50 },
               connections: {},
             });
-            connectEntities(draft, newId, selectedEntityId ?? "0");
+            connectEntities(draft.world, newId, draft.selectedEntityId ?? "0");
+            draft.selectedEntityId = newId;
           });
         }
       }
@@ -122,13 +118,7 @@ function Index() {
           onPointerDown={handlePointerDown}
           onPointerUp={handlePointerUp}
         >
-          {(size) => (
-            <WorldContainer
-              size={size}
-              pointer={pointer}
-              selectedEntityId={selectedEntityId}
-            />
-          )}
+          {(size) => <WorldContainer size={size} pointer={pointer} />}
         </SizeObserver>
       </div>
       <BottomBar />
@@ -147,7 +137,7 @@ function BottomBar() {
 
   return (
     <div className="p-2 flex border-t items-center justify-between">
-      <span className="font-mono select-none text-xs">{state.tick}</span>
+      <span className="font-mono select-none text-xs">{state.world.tick}</span>
       <button
         onClick={handleReset}
         className="text-xs text-blue-600 hover:underline"

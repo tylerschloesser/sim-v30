@@ -1,11 +1,11 @@
-import type { AppState } from "./AppStateContext";
-import { AppStateSchema, validateEntities } from "./AppStateContext";
+import type { AppState, World } from "./AppStateContext";
+import { WorldSchema, validateEntities } from "./AppStateContext";
 
 const STORAGE_KEY = "sim-v30-app-state";
 
 export function saveState(state: AppState): boolean {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state.world));
     return true;
   } catch (error) {
     console.error("Failed to save state:", error);
@@ -13,12 +13,12 @@ export function saveState(state: AppState): boolean {
   }
 }
 
-export function loadState(): AppState | null {
+export function loadWorld(): World | null {
   try {
     const json = localStorage.getItem(STORAGE_KEY);
     if (!json) return null;
 
-    const result = AppStateSchema.safeParse(JSON.parse(json));
+    const result = WorldSchema.safeParse(JSON.parse(json));
     if (!result.success) {
       console.warn("Invalid state in localStorage:", result.error.issues);
       localStorage.removeItem(STORAGE_KEY);

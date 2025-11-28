@@ -3,12 +3,14 @@ import { useImmer } from "use-immer";
 import type { AppState } from "./AppStateContext";
 import { AppStateContext } from "./AppStateContext";
 import { createDefaultState } from "./createDefaultState";
-import { loadState } from "./persistence";
+import { loadWorld } from "./persistence";
 import { usePersistence } from "../hooks/usePersistence";
 
 function createInitialState(): AppState {
-  const loaded = loadState();
-  if (loaded) return loaded;
+  const world = loadWorld();
+  if (world) {
+    return { world, selectedEntityId: null };
+  }
   return createDefaultState();
 }
 
