@@ -114,6 +114,8 @@ export function WorldContainer({
             cy={entity.position.y * scale}
             r={entity.radius * scale}
             fill={`hsl(${entity.color.h}, ${entity.color.s}%, ${entity.color.l}%)`}
+            stroke="#000"
+            strokeWidth={2 * scale}
           />
         ))}
         {connectionLines.map((line) => (
