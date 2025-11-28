@@ -10,8 +10,9 @@ export function createDefaultWorld(): World {
   };
 
   addEntity(world, {
-    position: { x: 0, y: 0 },
-    radius: 1,
+    position: { x: -1, y: -1 },
+    width: 2,
+    height: 2,
     color: { h: 220, s: 100, l: 50 },
     connections: {},
   });

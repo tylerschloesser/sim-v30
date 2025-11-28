@@ -6,10 +6,12 @@ export function findEntityAtPoint(
 ): string | null {
   return (
     Object.values(entities).find((entity) => {
-      const dx = point.x - entity.position.x;
-      const dy = point.y - entity.position.y;
-      const distance = Math.sqrt(dx * dx + dy * dy);
-      return distance <= entity.radius;
+      return (
+        point.x >= entity.position.x &&
+        point.x <= entity.position.x + entity.width &&
+        point.y >= entity.position.y &&
+        point.y <= entity.position.y + entity.height
+      );
     })?.id ?? null
   );
 }

@@ -21,7 +21,8 @@ export const HSLSchema = z.strictObject({
 export const EntitySchema = z.strictObject({
   id: z.string(),
   position: PositionSchema,
-  radius: z.number(),
+  width: z.number().int(),
+  height: z.number().int(),
   color: HSLSchema,
   connections: z.record(z.string(), z.literal(true)),
 });
@@ -51,6 +52,13 @@ export type AppStateContextType = {
 };
 
 export const AppStateContext = createContext<AppStateContextType | null>(null);
+
+export function getEntityCenter(entity: Entity): Position {
+  return {
+    x: entity.position.x + entity.width / 2,
+    y: entity.position.y + entity.height / 2,
+  };
+}
 
 export function createEntity(world: World, props: Omit<Entity, "id">): Entity {
   const id = String(world.nextEntityId);

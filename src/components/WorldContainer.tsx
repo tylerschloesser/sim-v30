@@ -3,6 +3,7 @@ import type { Size } from "./SizeObserver";
 import { useAppState } from "../hooks/useAppState";
 import { BASE_TILE_SIZE } from "../constants";
 import { findEntityAtPoint } from "../utils/world";
+import { getEntityCenter } from "../state/AppStateContext";
 
 export interface Pointer {
   x: number;
@@ -76,12 +77,15 @@ export function WorldContainer({
         const other = entities[connectedId];
         if (!other) continue;
 
+        const center1 = getEntityCenter(entity);
+        const center2 = getEntityCenter(other);
+
         lines.push({
           id: pairId,
-          x1: entity.position.x,
-          y1: entity.position.y,
-          x2: other.position.x,
-          y2: other.position.y,
+          x1: center1.x,
+          y1: center1.y,
+          x2: center2.x,
+          y2: center2.y,
         });
       }
     }
@@ -121,11 +125,12 @@ export function WorldContainer({
           fill={`url(#${patternId})`}
         />
         {Object.values(entities).map((entity) => (
-          <circle
+          <rect
             key={entity.id}
-            cx={entity.position.x * tileSize}
-            cy={entity.position.y * tileSize}
-            r={entity.radius * tileSize}
+            x={entity.position.x * tileSize}
+            y={entity.position.y * tileSize}
+            width={entity.width * tileSize}
+            height={entity.height * tileSize}
             fill={`hsl(${entity.color.h}, ${entity.color.s}%, ${entity.color.l}%)`}
             stroke={
               selectedEntityId === entity.id
@@ -149,11 +154,13 @@ export function WorldContainer({
           />
         ))}
         {!hoverEntityId && pointerWorld && (
-          <circle
-            cx={pointerWorld.x * tileSize}
-            cy={pointerWorld.y * tileSize}
-            r={tileSize / 2}
+          <rect
+            x={Math.round(pointerWorld.x - 1) * tileSize}
+            y={Math.round(pointerWorld.y - 1) * tileSize}
+            width={2 * tileSize}
+            height={2 * tileSize}
             fill="red"
+            opacity={0.5}
           />
         )}
       </g>

@@ -97,9 +97,14 @@ function Index() {
           });
         } else {
           updateState((draft) => {
+            const width = 2;
+            const height = 2;
+            const topLeftX = Math.round(worldX - width / 2);
+            const topLeftY = Math.round(worldY - height / 2);
             const newId = addEntity(draft.world, {
-              position: { x: worldX, y: worldY },
-              radius: 0.5,
+              position: { x: topLeftX, y: topLeftY },
+              width,
+              height,
               color: { h: Math.random() * 360, s: 100, l: 50 },
               connections: {},
             });
