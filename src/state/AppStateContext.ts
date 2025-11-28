@@ -52,10 +52,7 @@ export type AppStateContextType = {
 
 export const AppStateContext = createContext<AppStateContextType | null>(null);
 
-export function createEntity(
-  world: World,
-  props: Omit<Entity, "id">,
-): Entity {
+export function createEntity(world: World, props: Omit<Entity, "id">): Entity {
   const id = String(world.nextEntityId);
   return { id, ...props };
 }
@@ -67,11 +64,7 @@ export function addEntity(world: World, props: Omit<Entity, "id">): string {
   return entity.id;
 }
 
-export function connectEntities(
-  world: World,
-  idA: string,
-  idB: string,
-): void {
+export function connectEntities(world: World, idA: string, idB: string): void {
   const entityA = world.entities[idA];
   const entityB = world.entities[idB];
   invariant(entityA, `Entity ${idA} does not exist`);

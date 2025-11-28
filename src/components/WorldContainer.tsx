@@ -1,7 +1,8 @@
 import { useMemo } from "react";
 import type { Size } from "./SizeObserver";
 import { useAppState } from "../hooks/useAppState";
-import type { Entity } from "../state/AppStateContext";
+import { BASE_TILE_SIZE } from "../constants";
+import { findEntityAtPoint } from "../utils/world";
 
 export interface Pointer {
   x: number;
@@ -13,25 +14,6 @@ interface WorldContainerProps {
   size: Size;
   pointer: Pointer | null;
   scale?: number;
-}
-
-export const BASE_TILE_SIZE = 32;
-
-export function findEntityAtPoint(
-  entities: Record<string, Entity>,
-  point: { x: number; y: number }
-): string | null {
-  const tileX = point.x / BASE_TILE_SIZE;
-  const tileY = point.y / BASE_TILE_SIZE;
-
-  return (
-    Object.values(entities).find((entity) => {
-      const dx = tileX - entity.position.x;
-      const dy = tileY - entity.position.y;
-      const distance = Math.sqrt(dx * dx + dy * dy);
-      return distance <= entity.radius;
-    })?.id ?? null
-  );
 }
 
 interface ConnectionLine {
@@ -55,19 +37,19 @@ export function WorldContainer({
   const patternId = `dot-grid-${scale}`;
 
   const scaledCamera = useMemo(
-    () => ({ x: camera.x * scale, y: camera.y * scale }),
-    [camera, scale],
+    () => ({ x: camera.x * tileSize, y: camera.y * tileSize }),
+    [camera, tileSize],
   );
 
   const pointerWorld = useMemo(
     () =>
       pointer
         ? {
-            x: pointer.x + scaledCamera.x,
-            y: pointer.y + scaledCamera.y,
+            x: pointer.x / tileSize + camera.x,
+            y: pointer.y / tileSize + camera.y,
           }
         : null,
-    [pointer, scaledCamera],
+    [pointer, camera, tileSize],
   );
 
   const gridX =
@@ -168,8 +150,8 @@ export function WorldContainer({
         ))}
         {!hoverEntityId && pointerWorld && (
           <circle
-            cx={pointerWorld.x}
-            cy={pointerWorld.y}
+            cx={pointerWorld.x * tileSize}
+            cy={pointerWorld.y * tileSize}
             r={tileSize / 2}
             fill="red"
           />

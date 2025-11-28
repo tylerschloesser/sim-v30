@@ -5,12 +5,9 @@ import {
   SizeObserver,
   type CanvasPointerEvent,
 } from "../components/SizeObserver";
-import {
-  WorldContainer,
-  findEntityAtPoint,
-  BASE_TILE_SIZE,
-  type Pointer,
-} from "../components/WorldContainer";
+import { WorldContainer, type Pointer } from "../components/WorldContainer";
+import { BASE_TILE_SIZE } from "../constants";
+import { findEntityAtPoint } from "../utils/world";
 import { useAppState } from "../hooks/useAppState";
 import { addEntity, connectEntities } from "../state/AppStateContext";
 import { createDefaultState } from "../state/createDefaultState";
@@ -51,8 +48,8 @@ function Index() {
       const deltaX = e.x - drag.startPointer.x;
       const deltaY = e.y - drag.startPointer.y;
       updateState((draft) => {
-        draft.world.camera.x = drag.startCamera.x - deltaX;
-        draft.world.camera.y = drag.startCamera.y - deltaY;
+        draft.world.camera.x = drag.startCamera.x - deltaX / BASE_TILE_SIZE;
+        draft.world.camera.y = drag.startCamera.y - deltaY / BASE_TILE_SIZE;
       });
     }
   };
@@ -82,8 +79,8 @@ function Index() {
       const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
 
       if (distance < DRAG_THRESHOLD) {
-        const worldX = e.x + state.world.camera.x;
-        const worldY = e.y + state.world.camera.y;
+        const worldX = e.x / BASE_TILE_SIZE + state.world.camera.x;
+        const worldY = e.y / BASE_TILE_SIZE + state.world.camera.y;
 
         const clickedEntityId = findEntityAtPoint(state.world.entities, {
           x: worldX,
@@ -101,7 +98,7 @@ function Index() {
         } else {
           updateState((draft) => {
             const newId = addEntity(draft.world, {
-              position: { x: worldX / BASE_TILE_SIZE, y: worldY / BASE_TILE_SIZE },
+              position: { x: worldX, y: worldY },
               radius: 0.5,
               color: { h: Math.random() * 360, s: 100, l: 50 },
               connections: {},
