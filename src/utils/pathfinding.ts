@@ -34,18 +34,21 @@ function isWalkable(
   chunks: Record<string, Chunk>,
   x: number,
   y: number,
-  allowedEntityIds: Set<string>,
+  startTileId: TileId,
+  endTileId: TileId,
 ): boolean {
   const entityId = getEntityAtTile(chunks, x, y);
   if (!entityId) return true; // Empty tiles are walkable
-  return allowedEntityIds.has(entityId); // Entity tiles allowed if in set
+
+  // Entity tiles are only walkable if they are the start or end
+  const tileId = createTileId(x, y);
+  return tileId === startTileId || tileId === endTileId;
 }
 
 export function findPath(
   chunks: Record<string, Chunk>,
   startTileId: TileId,
   endTileId: TileId,
-  allowedEntityIds: Set<string>,
   maxIterations: number = 500,
 ): TileId[] | null {
   const start = parseTileId(startTileId);
@@ -96,7 +99,7 @@ export function findPath(
       if (closedSet.has(neighborId)) continue;
 
       // Check if tile is walkable
-      if (!isWalkable(chunks, nx, ny, allowedEntityIds)) {
+      if (!isWalkable(chunks, nx, ny, startTileId, endTileId)) {
         continue;
       }
 

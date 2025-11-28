@@ -69,12 +69,7 @@ function Index() {
 
     if (!srcEntity || !dstEntity || srcEntity === dstEntity) return null;
 
-    return findPath(
-      chunks,
-      selectedTileId as TileId,
-      hoverTileId,
-      new Set([srcEntity, dstEntity]),
-    );
+    return findPath(chunks, selectedTileId as TileId, hoverTileId);
   }, [selectedTileId, hoverTileId, chunks]);
 
   const handlePointerEnter = (e: CanvasPointerEvent) => {
