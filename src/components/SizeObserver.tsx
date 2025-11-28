@@ -1,12 +1,11 @@
 import {
+  useEffect,
+  useLayoutEffect,
+  useMemo,
   useRef,
   useState,
-  useLayoutEffect,
-  useEffect,
   type ReactNode,
-  useMemo,
 } from "react";
-import { invariant } from "../utils/invariant";
 
 export interface Size {
   width: number;
@@ -43,11 +42,11 @@ export function SizeObserver({
   }, [rect.width, rect.height]);
 
   useEffect(() => {
-    invariant(ref.current);
+    const el = ref.current;
+    if (!el) return;
 
     const transform = (e: PointerEvent): CanvasPointerEvent => {
-      invariant(ref.current);
-      const rect = ref.current.getBoundingClientRect();
+      const rect = el.getBoundingClientRect();
       return {
         x: e.clientX - rect.left - size.width / 2,
         y: e.clientY - rect.top - size.height / 2,
@@ -56,7 +55,7 @@ export function SizeObserver({
     };
 
     const handleDown = (e: PointerEvent) => {
-      if (e.target instanceof Element && ref.current?.contains(e.target)) {
+      if (e.target instanceof Element && el.contains(e.target)) {
         onPointerDown?.(transform(e));
       }
     };
@@ -68,15 +67,15 @@ export function SizeObserver({
     document.addEventListener("pointerdown", handleDown);
     document.addEventListener("pointermove", handleMove);
     document.addEventListener("pointerup", handleUp);
-    ref.current.addEventListener("pointerenter", handleEnter);
-    ref.current.addEventListener("pointerleave", handleLeave);
+    el.addEventListener("pointerenter", handleEnter);
+    el.addEventListener("pointerleave", handleLeave);
 
     return () => {
       document.removeEventListener("pointerdown", handleDown);
       document.removeEventListener("pointermove", handleMove);
       document.removeEventListener("pointerup", handleUp);
-      ref.current?.removeEventListener("pointerenter", handleEnter);
-      ref.current?.removeEventListener("pointerleave", handleLeave);
+      el.removeEventListener("pointerenter", handleEnter);
+      el.removeEventListener("pointerleave", handleLeave);
     };
   }, [
     size,
@@ -109,6 +108,6 @@ function useRect(ref: React.RefObject<HTMLDivElement | null>): DOMRectReadOnly {
 
     observer.observe(el);
     return () => observer.disconnect();
-  }, []);
+  }, [ref]);
   return rect;
 }

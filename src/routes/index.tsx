@@ -8,7 +8,7 @@ import {
 import { WorldContainer, type Pointer } from "../components/WorldContainer";
 import { useAppState } from "../hooks/useAppState";
 import { addEntity, connectEntities } from "../state/AppStateContext";
-import { createDefaultState } from "../state/AppState";
+import { createDefaultState } from "../state/createDefaultState";
 
 const DRAG_THRESHOLD = 5;
 

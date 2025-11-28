@@ -1,27 +1,10 @@
 import type { ReactNode } from "react";
 import { useImmer } from "use-immer";
 import type { AppState } from "./AppStateContext";
-import { addEntity, AppStateContext } from "./AppStateContext";
+import { AppStateContext } from "./AppStateContext";
+import { createDefaultState } from "./createDefaultState";
 import { loadState } from "./persistence";
 import { usePersistence } from "../hooks/usePersistence";
-
-export function createDefaultState(): AppState {
-  const state: AppState = {
-    tick: 0,
-    camera: { x: 0, y: 0 },
-    nextEntityId: 0,
-    entities: {},
-  };
-
-  addEntity(state, {
-    position: { x: 0, y: 0 },
-    radius: 32,
-    color: { h: 220, s: 100, l: 50 },
-    connections: {},
-  });
-
-  return state;
-}
 
 function createInitialState(): AppState {
   const loaded = loadState();
