@@ -7,7 +7,7 @@ import {
 } from "../components/SizeObserver";
 import { WorldContainer, type Pointer } from "../components/WorldContainer";
 import { BASE_TILE_SIZE } from "../constants";
-import { findEntityAtPoint } from "../utils/world";
+import { findEntityAtPoint, hasOverlappingEntity } from "../utils/world";
 import { useAppState } from "../hooks/useAppState";
 import { addEntity, connectEntities } from "../state/AppStateContext";
 import { createDefaultState } from "../state/createDefaultState";
@@ -96,21 +96,31 @@ function Index() {
             }
           });
         } else {
-          updateState((draft) => {
-            const width = 2;
-            const height = 2;
-            const topLeftX = Math.round(worldX - width / 2);
-            const topLeftY = Math.round(worldY - height / 2);
-            const newId = addEntity(draft.world, {
-              position: { x: topLeftX, y: topLeftY },
+          const width = 2;
+          const height = 2;
+          const topLeftX = Math.round(worldX - width / 2);
+          const topLeftY = Math.round(worldY - height / 2);
+
+          if (
+            !hasOverlappingEntity(state.world.entities, {
+              x: topLeftX,
+              y: topLeftY,
               width,
               height,
-              color: { h: Math.random() * 360, s: 100, l: 50 },
-              connections: {},
+            })
+          ) {
+            updateState((draft) => {
+              const newId = addEntity(draft.world, {
+                position: { x: topLeftX, y: topLeftY },
+                width,
+                height,
+                color: { h: Math.random() * 360, s: 100, l: 50 },
+                connections: {},
+              });
+              connectEntities(draft.world, newId, draft.selectedEntityId ?? "0");
+              draft.selectedEntityId = newId;
             });
-            connectEntities(draft.world, newId, draft.selectedEntityId ?? "0");
-            draft.selectedEntityId = newId;
-          });
+          }
         }
       }
 
