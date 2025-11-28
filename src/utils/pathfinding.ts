@@ -112,13 +112,18 @@ export function findPath(
       }
 
       // For diagonal moves, check we're not cutting a corner
-      if (dir.dx !== 0 && dir.dy !== 0) {
+      const isDiagonal = dir.dx !== 0 && dir.dy !== 0;
+      if (isDiagonal) {
         if (
           hasEntityAt(chunks, current.x + dir.dx, current.y) ||
           hasEntityAt(chunks, current.x, current.y + dir.dy)
         ) {
           continue;
         }
+
+        // First/last step must be cardinal (no diagonal entry/exit from entities)
+        if (current.tileId === startTileId) continue;
+        if (neighborId === endTileId) continue;
       }
 
       // Diagonal movement costs sqrt(2), cardinal costs 1
