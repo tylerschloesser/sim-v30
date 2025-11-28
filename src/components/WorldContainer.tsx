@@ -10,6 +10,13 @@ import {
 import { getEntityAtTile, getTileIdFromChunkIndex } from "../utils/chunks";
 import { parseTileId } from "../utils/tileId";
 import type { TileId } from "../utils/tileId";
+import type { ItemType } from "../state/AppStateContext";
+
+const ITEM_TYPE_COLORS: Record<ItemType, string> = {
+  iron: "#8A8A8A",
+  copper: "#B87333",
+  stone: "#A09080",
+};
 
 export interface Pointer {
   x: number;
@@ -125,6 +132,22 @@ export function WorldContainer({
     return getEntityAtTile(chunks, pos.x, pos.y);
   }, [selectedTileId, chunks]);
 
+  // Collect resource tiles for rendering
+  const resourceTiles = useMemo(() => {
+    const tiles: Array<{ x: number; y: number; itemType: ItemType }> = [];
+    for (const [chunkKey, chunk] of Object.entries(chunks)) {
+      for (let i = 0; i < chunk.tiles.length; i++) {
+        const tile = chunk.tiles[i];
+        if (tile?.itemType) {
+          const tileId = getTileIdFromChunkIndex(chunkKey, i);
+          const { x, y } = parseTileId(tileId);
+          tiles.push({ x, y, itemType: tile.itemType });
+        }
+      }
+    }
+    return tiles;
+  }, [chunks]);
+
   return (
     <svg className="w-full h-full">
       <defs>
@@ -152,6 +175,33 @@ export function WorldContainer({
           height={size.height + tileSize * 2}
           fill={`url(#${patternId})`}
         />
+        {/* Resource tiles with checkerboard pattern */}
+        {resourceTiles.map(({ x, y, itemType }) => {
+          const color = ITEM_TYPE_COLORS[itemType];
+          const cellSize = tileSize / 4;
+          const rects: React.ReactNode[] = [];
+          for (let row = 0; row < 4; row++) {
+            for (let col = 0; col < 4; col++) {
+              if ((row + col) % 2 === 0) {
+                rects.push(
+                  <rect
+                    key={`${row}-${col}`}
+                    x={x * tileSize + col * cellSize}
+                    y={y * tileSize + row * cellSize}
+                    width={cellSize}
+                    height={cellSize}
+                    fill={color}
+                  />,
+                );
+              }
+            }
+          }
+          return (
+            <g key={`resource-${x}-${y}`}>
+              {rects}
+            </g>
+          );
+        })}
         {Object.values(entities).map((entity) => (
           <rect
             key={entity.id}

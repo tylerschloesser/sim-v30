@@ -19,9 +19,12 @@ export const HSLSchema = z.strictObject({
   l: z.number(),
 });
 
+export const ItemTypeSchema = z.enum(["iron", "copper", "stone"]);
+
 export const TileSchema = z.strictObject({
   entityId: z.string().optional(),
   connections: z.record(z.string(), z.literal(true)).default({}),
+  itemType: ItemTypeSchema.optional(),
 });
 
 export const ChunkSchema = z.strictObject({
@@ -52,6 +55,7 @@ export const AppStateSchema = z.strictObject({
 export type Camera = z.infer<typeof CameraSchema>;
 export type Position = z.infer<typeof PositionSchema>;
 export type HSL = z.infer<typeof HSLSchema>;
+export type ItemType = z.infer<typeof ItemTypeSchema>;
 export type Tile = z.infer<typeof TileSchema>;
 export type Chunk = z.infer<typeof ChunkSchema>;
 export type Entity = z.infer<typeof EntitySchema>;
