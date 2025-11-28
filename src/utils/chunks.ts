@@ -62,6 +62,7 @@ export function setEntityOnTiles(
     chunk.tiles[index] = {
       entityId,
       connections: existing?.connections ?? {},
+      itemType: existing?.itemType,
     };
   }
 }
@@ -82,7 +83,7 @@ export function clearEntityFromTiles(
   }
 }
 
-/** Check if any tiles for a 2x2 entity at (x, y) are occupied */
+/** Check if any tiles for a 2x2 entity at (x, y) are occupied by an entity */
 export function areTilesOccupied(
   chunks: Record<string, Chunk>,
   x: number,
@@ -93,7 +94,7 @@ export function areTilesOccupied(
     const chunk = chunks[key];
     if (chunk) {
       const index = getTileIndex(pos.x, pos.y);
-      if (chunk.tiles[index] !== null) {
+      if (chunk.tiles[index]?.entityId) {
         return true;
       }
     }

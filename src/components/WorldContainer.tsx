@@ -175,6 +175,24 @@ export function WorldContainer({
           height={size.height + tileSize * 2}
           fill={`url(#${patternId})`}
         />
+        {Object.values(entities).map((entity) => (
+          <rect
+            key={entity.id}
+            x={entity.position.x * tileSize}
+            y={entity.position.y * tileSize}
+            width={entity.width * tileSize}
+            height={entity.height * tileSize}
+            fill={`hsl(${entity.color.h}, ${entity.color.s}%, ${entity.color.l}%)`}
+            stroke={
+              selectedEntityId === entity.id
+                ? "#0ff"
+                : hoverEntityId === entity.id
+                  ? "#ff0"
+                  : "#000"
+            }
+            strokeWidth={2 * scale}
+          />
+        ))}
         {/* Resource tiles with checkerboard pattern */}
         {resourceTiles.map(({ x, y, itemType }) => {
           const color = ITEM_TYPE_COLORS[itemType];
@@ -202,24 +220,6 @@ export function WorldContainer({
             </g>
           );
         })}
-        {Object.values(entities).map((entity) => (
-          <rect
-            key={entity.id}
-            x={entity.position.x * tileSize}
-            y={entity.position.y * tileSize}
-            width={entity.width * tileSize}
-            height={entity.height * tileSize}
-            fill={`hsl(${entity.color.h}, ${entity.color.s}%, ${entity.color.l}%)`}
-            stroke={
-              selectedEntityId === entity.id
-                ? "#0ff"
-                : hoverEntityId === entity.id
-                  ? "#ff0"
-                  : "#000"
-            }
-            strokeWidth={2 * scale}
-          />
-        ))}
         {/* Tile-based connections */}
         {connectionPath && (
           <path
