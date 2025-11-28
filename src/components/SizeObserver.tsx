@@ -74,12 +74,11 @@ export function SizeObserver({
     ref.current.addEventListener("pointerleave", handleLeave);
 
     return () => {
-      invariant(ref.current);
       document.removeEventListener("pointerdown", handleDown);
       document.removeEventListener("pointermove", handleMove);
       document.removeEventListener("pointerup", handleUp);
-      ref.current.removeEventListener("pointerenter", handleEnter);
-      ref.current.removeEventListener("pointerleave", handleLeave);
+      ref.current?.removeEventListener("pointerenter", handleEnter);
+      ref.current?.removeEventListener("pointerleave", handleLeave);
     };
   }, [
     size,
@@ -91,7 +90,7 @@ export function SizeObserver({
   ]);
 
   return (
-    <div ref={ref} className="absolute inset-0">
+    <div data-name="size-observer" ref={ref} className="absolute inset-0">
       {size.width > 0 && size.height > 0 && children(size)}
     </div>
   );
