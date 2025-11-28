@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import type { Size } from "./SizeObserver";
 import { useAppState } from "../hooks/useAppState";
+import type { Entity } from "../state/AppStateContext";
 
 export interface Pointer {
   x: number;
@@ -11,7 +12,22 @@ export interface Pointer {
 interface WorldContainerProps {
   size: Size;
   pointer: Pointer | null;
+  selectedEntityId: string | null;
   scale?: number;
+}
+
+export function findEntityAtPoint(
+  entities: Record<string, Entity>,
+  point: { x: number; y: number }
+): string | null {
+  return (
+    Object.values(entities).find((entity) => {
+      const dx = point.x - entity.position.x;
+      const dy = point.y - entity.position.y;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+      return distance <= entity.radius;
+    })?.id ?? null
+  );
 }
 
 const BASE_CELL_SIZE = 32;
@@ -27,6 +43,7 @@ interface ConnectionLine {
 export function WorldContainer({
   size,
   pointer,
+  selectedEntityId,
   scale = 1,
 }: WorldContainerProps) {
   const { state } = useAppState();
@@ -89,14 +106,7 @@ export function WorldContainer({
 
   const hoverEntityId = useMemo(() => {
     if (!pointerWorld) return null;
-    return (
-      Object.values(state.entities).find((entity) => {
-        const dx = pointerWorld.x - entity.position.x;
-        const dy = pointerWorld.y - entity.position.y;
-        const distance = Math.sqrt(dx * dx + dy * dy);
-        return distance <= entity.radius;
-      })?.id ?? null
-    );
+    return findEntityAtPoint(state.entities, pointerWorld);
   }, [pointerWorld, state.entities]);
 
   return (
@@ -133,7 +143,13 @@ export function WorldContainer({
             cy={entity.position.y * scale}
             r={entity.radius * scale}
             fill={`hsl(${entity.color.h}, ${entity.color.s}%, ${entity.color.l}%)`}
-            stroke={hoverEntityId === entity.id ? "#ff0" : "#000"}
+            stroke={
+              selectedEntityId === entity.id
+                ? "#0ff"
+                : hoverEntityId === entity.id
+                  ? "#ff0"
+                  : "#000"
+            }
             strokeWidth={2 * scale}
           />
         ))}

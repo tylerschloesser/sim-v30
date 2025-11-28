@@ -1,11 +1,16 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useState } from "react";
 import { useImmer } from "use-immer";
 import { Nav } from "../components/Nav";
 import {
   SizeObserver,
   type CanvasPointerEvent,
 } from "../components/SizeObserver";
-import { WorldContainer, type Pointer } from "../components/WorldContainer";
+import {
+  WorldContainer,
+  findEntityAtPoint,
+  type Pointer,
+} from "../components/WorldContainer";
 import { useAppState } from "../hooks/useAppState";
 import { addEntity, connectEntities } from "../state/AppStateContext";
 import { createDefaultState } from "../state/createDefaultState";
@@ -29,6 +34,7 @@ function Index() {
   const [pointer, setPointer] = useImmer<Pointer | null>(null);
 
   const [drag, setDrag] = useImmer<DragState | null>(null);
+  const [selectedEntityId, setSelectedEntityId] = useState<string | null>(null);
 
   const handlePointerEnter = (e: CanvasPointerEvent) => {
     setPointer({ x: e.x, y: e.y, id: e.nativeEvent.pointerId });
@@ -80,16 +86,25 @@ function Index() {
         const worldX = e.x + state.camera.x;
         const worldY = e.y + state.camera.y;
 
-        updateState((draft) => {
-          const newId = String(draft.nextEntityId);
-          addEntity(draft, {
-            position: { x: worldX, y: worldY },
-            radius: 16,
-            color: { h: Math.random() * 360, s: 100, l: 50 },
-            connections: {},
-          });
-          connectEntities(draft, newId, "0");
+        const clickedEntityId = findEntityAtPoint(state.entities, {
+          x: worldX,
+          y: worldY,
         });
+
+        if (clickedEntityId) {
+          setSelectedEntityId(clickedEntityId);
+        } else {
+          updateState((draft) => {
+            const newId = String(draft.nextEntityId);
+            addEntity(draft, {
+              position: { x: worldX, y: worldY },
+              radius: 16,
+              color: { h: Math.random() * 360, s: 100, l: 50 },
+              connections: {},
+            });
+            connectEntities(draft, newId, "0");
+          });
+        }
       }
 
       setDrag(null);
@@ -107,7 +122,13 @@ function Index() {
           onPointerDown={handlePointerDown}
           onPointerUp={handlePointerUp}
         >
-          {(size) => <WorldContainer size={size} pointer={pointer} />}
+          {(size) => (
+            <WorldContainer
+              size={size}
+              pointer={pointer}
+              selectedEntityId={selectedEntityId}
+            />
+          )}
         </SizeObserver>
       </div>
       <BottomBar />
