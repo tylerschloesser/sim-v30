@@ -1,7 +1,7 @@
 import { createContext } from "react";
 import { z } from "zod";
-import { setEntityOnTiles } from "../utils/chunks";
-import { invariant } from "../utils/invariant";
+import { getOrCreateTile, setEntityOnTiles } from "../utils/chunks";
+import type { TileId } from "../utils/tileId";
 
 export const CameraSchema = z.strictObject({
   x: z.number(),
@@ -20,7 +20,8 @@ export const HSLSchema = z.strictObject({
 });
 
 export const TileSchema = z.strictObject({
-  entityId: z.string(),
+  entityId: z.string().optional(),
+  connections: z.record(z.string(), z.literal(true)).default({}),
 });
 
 export const ChunkSchema = z.strictObject({
@@ -33,7 +34,6 @@ export const EntitySchema = z.strictObject({
   width: z.number().int(),
   height: z.number().int(),
   color: HSLSchema,
-  connections: z.record(z.string(), z.literal(true)),
 });
 
 export const WorldSchema = z.strictObject({
@@ -46,7 +46,7 @@ export const WorldSchema = z.strictObject({
 
 export const AppStateSchema = z.strictObject({
   world: WorldSchema,
-  selectedEntityId: z.string().nullable(),
+  selectedTileId: z.string().nullable(),
 });
 
 export type Camera = z.infer<typeof CameraSchema>;
@@ -90,40 +90,15 @@ export function addEntity(world: World, props: Omit<Entity, "id">): string {
   return entity.id;
 }
 
-export function connectEntities(world: World, idA: string, idB: string): void {
-  const entityA = world.entities[idA];
-  const entityB = world.entities[idB];
-  invariant(entityA, `Entity ${idA} does not exist`);
-  invariant(entityB, `Entity ${idB} does not exist`);
-  invariant(idA !== idB, `Cannot connect entity ${idA} to itself`);
-  entityA.connections[idB] = true;
-  entityB.connections[idA] = true;
-}
+export function connectTiles(world: World, path: TileId[]): void {
+  for (let i = 0; i < path.length - 1; i++) {
+    const tileIdA = path[i];
+    const tileIdB = path[i + 1];
 
-export function disconnectEntities(
-  world: World,
-  idA: string,
-  idB: string,
-): void {
-  const entityA = world.entities[idA];
-  const entityB = world.entities[idB];
-  if (entityA) delete entityA.connections[idB];
-  if (entityB) delete entityB.connections[idA];
-}
+    const tileA = getOrCreateTile(world.chunks, tileIdA);
+    const tileB = getOrCreateTile(world.chunks, tileIdB);
 
-export function validateEntities(world: World): boolean {
-  for (const [id, entity] of Object.entries(world.entities)) {
-    for (const connectedId of Object.keys(entity.connections)) {
-      // No self-connections
-      if (connectedId === id) return false;
-
-      // Connected entity must exist
-      const connectedEntity = world.entities[connectedId];
-      if (!connectedEntity) return false;
-
-      // Connection must be bidirectional
-      if (!connectedEntity.connections[id]) return false;
-    }
+    tileA.connections[tileIdB] = true;
+    tileB.connections[tileIdA] = true;
   }
-  return true;
 }

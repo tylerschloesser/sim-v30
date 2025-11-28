@@ -1,5 +1,5 @@
 import type { AppState, World } from "./AppStateContext";
-import { WorldSchema, validateEntities } from "./AppStateContext";
+import { WorldSchema } from "./AppStateContext";
 
 const STORAGE_KEY = "sim-v30-world";
 
@@ -21,11 +21,6 @@ export function loadWorld(): World | null {
     const result = WorldSchema.safeParse(JSON.parse(json));
     if (!result.success) {
       console.warn("Invalid state in localStorage:", result.error.issues);
-      localStorage.removeItem(STORAGE_KEY);
-      return null;
-    }
-    if (!validateEntities(result.data)) {
-      console.warn("Invalid entity connections in localStorage");
       localStorage.removeItem(STORAGE_KEY);
       return null;
     }

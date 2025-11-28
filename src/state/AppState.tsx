@@ -9,7 +9,7 @@ import { usePersistence } from "../hooks/usePersistence";
 function createInitialState(): AppState {
   const world = loadWorld();
   if (world) {
-    return { world, selectedEntityId: null };
+    return { world, selectedTileId: null };
   }
   return createDefaultState();
 }

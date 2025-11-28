@@ -3,7 +3,9 @@ import type { Size } from "./SizeObserver";
 import { useAppState } from "../hooks/useAppState";
 import { BASE_TILE_SIZE } from "../constants";
 import { findEntityAtPoint, hasOverlappingEntity } from "../utils/world";
-import { getEntityCenter } from "../state/AppStateContext";
+import { getEntityAtTile, getTileIdFromChunkIndex } from "../utils/chunks";
+import { parseTileId } from "../utils/tileId";
+import type { TileId } from "../utils/tileId";
 
 export interface Pointer {
   x: number;
@@ -15,23 +17,17 @@ interface WorldContainerProps {
   size: Size;
   pointer: Pointer | null;
   scale?: number;
-}
-
-interface ConnectionLine {
-  id: string;
-  x1: number;
-  y1: number;
-  x2: number;
-  y2: number;
+  previewPath?: TileId[] | null;
 }
 
 export function WorldContainer({
   size,
   pointer,
   scale = 1,
+  previewPath,
 }: WorldContainerProps) {
   const { state } = useAppState();
-  const { world, selectedEntityId } = state;
+  const { world, selectedTileId } = state;
   const { camera, entities, chunks } = world;
 
   const tileSize = BASE_TILE_SIZE * scale;
@@ -60,42 +56,53 @@ export function WorldContainer({
     Math.floor((scaledCamera.y - size.height / 2) / tileSize) * tileSize -
     tileSize;
 
-  const connectionLines = useMemo(() => {
-    const lines: ConnectionLine[] = [];
+  // Build SVG path for tile-based connections
+  const connectionPath = useMemo(() => {
+    const segments: string[] = [];
     const seen = new Set<string>();
 
-    for (const entity of Object.values(entities)) {
-      for (const connectedId of Object.keys(entity.connections)) {
-        const pairId =
-          entity.id < connectedId
-            ? `${entity.id}-${connectedId}`
-            : `${connectedId}-${entity.id}`;
+    for (const [chunkKey, chunk] of Object.entries(chunks)) {
+      for (let i = 0; i < chunk.tiles.length; i++) {
+        const tile = chunk.tiles[i];
+        if (!tile?.connections) continue;
 
-        if (seen.has(pairId)) continue;
-        seen.add(pairId);
+        const tileId = getTileIdFromChunkIndex(chunkKey, i);
+        const { x: x1, y: y1 } = parseTileId(tileId);
 
-        const other = entities[connectedId];
-        if (!other) continue;
+        for (const connectedId of Object.keys(tile.connections)) {
+          const pairKey =
+            tileId < connectedId
+              ? `${tileId}|${connectedId}`
+              : `${connectedId}|${tileId}`;
+          if (seen.has(pairKey)) continue;
+          seen.add(pairKey);
 
-        const center1 = getEntityCenter(entity);
-        const center2 = getEntityCenter(other);
-
-        lines.push({
-          id: pairId,
-          x1: center1.x,
-          y1: center1.y,
-          x2: center2.x,
-          y2: center2.y,
-        });
+          const { x: x2, y: y2 } = parseTileId(connectedId);
+          segments.push(`M${x1 + 0.5} ${y1 + 0.5} L${x2 + 0.5} ${y2 + 0.5}`);
+        }
       }
     }
-    return lines;
-  }, [entities]);
+
+    return segments.join(" ");
+  }, [chunks]);
 
   const hoverEntityId = useMemo(() => {
     if (!pointerWorld) return null;
     return findEntityAtPoint(chunks, pointerWorld);
   }, [pointerWorld, chunks]);
+
+  // Build preview path SVG
+  const previewPathD = useMemo(() => {
+    if (!previewPath || previewPath.length < 2) return null;
+
+    const commands = previewPath.map((tileId, i) => {
+      const { x, y } = parseTileId(tileId);
+      const cmd = i === 0 ? "M" : "L";
+      return `${cmd}${x + 0.5} ${y + 0.5}`;
+    });
+
+    return commands.join(" ");
+  }, [previewPath]);
 
   const previewOverlaps = useMemo(() => {
     if (!pointerWorld) return false;
@@ -104,6 +111,13 @@ export function WorldContainer({
       y: Math.round(pointerWorld.y - 1),
     });
   }, [pointerWorld, chunks]);
+
+  // Get selected entity ID for entity stroke highlighting
+  const selectedEntityId = useMemo(() => {
+    if (!selectedTileId) return null;
+    const pos = parseTileId(selectedTileId);
+    return getEntityAtTile(chunks, pos.x, pos.y);
+  }, [selectedTileId, chunks]);
 
   return (
     <svg className="w-full h-full">
@@ -150,17 +164,40 @@ export function WorldContainer({
             strokeWidth={2 * scale}
           />
         ))}
-        {connectionLines.map((line) => (
-          <line
-            key={line.id}
-            x1={line.x1 * tileSize}
-            y1={line.y1 * tileSize}
-            x2={line.x2 * tileSize}
-            y2={line.y2 * tileSize}
-            stroke="#000"
+        {/* Tile-based connections */}
+        {connectionPath && (
+          <path
+            d={connectionPath}
+            stroke="#666"
+            strokeWidth={0.1}
+            fill="none"
+            transform={`scale(${tileSize})`}
+          />
+        )}
+        {/* Preview path */}
+        {previewPathD && (
+          <path
+            d={previewPathD}
+            stroke="#0ff"
+            strokeWidth={0.15}
+            strokeDasharray="0.2 0.1"
+            fill="none"
+            opacity={0.8}
+            transform={`scale(${tileSize})`}
+          />
+        )}
+        {/* Selected tile highlight */}
+        {selectedTileId && (
+          <rect
+            x={parseTileId(selectedTileId).x * tileSize}
+            y={parseTileId(selectedTileId).y * tileSize}
+            width={tileSize}
+            height={tileSize}
+            fill="none"
+            stroke="#0ff"
             strokeWidth={2 * scale}
           />
-        ))}
+        )}
         {!hoverEntityId && !previewOverlaps && pointerWorld && (
           <rect
             x={Math.round(pointerWorld.x - 1) * tileSize}

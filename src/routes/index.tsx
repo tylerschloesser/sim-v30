@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useMemo } from "react";
 import { useImmer } from "use-immer";
 import { Nav } from "../components/Nav";
 import {
@@ -7,10 +8,14 @@ import {
 } from "../components/SizeObserver";
 import { WorldContainer, type Pointer } from "../components/WorldContainer";
 import { BASE_TILE_SIZE } from "../constants";
-import { findEntityAtPoint, hasOverlappingEntity } from "../utils/world";
+import { hasOverlappingEntity } from "../utils/world";
+import { getEntityAtTile } from "../utils/chunks";
 import { useAppState } from "../hooks/useAppState";
-import { addEntity, connectEntities } from "../state/AppStateContext";
+import { addEntity, connectTiles } from "../state/AppStateContext";
 import { createDefaultState } from "../state/createDefaultState";
+import { createTileId, parseTileId } from "../utils/tileId";
+import type { TileId } from "../utils/tileId";
+import { findPath } from "../utils/pathfinding";
 
 const DRAG_THRESHOLD = 5;
 
@@ -26,11 +31,51 @@ interface DragState {
 
 function Index() {
   const { state, updateState } = useAppState();
+  const { world, selectedTileId } = state;
+  const { camera, chunks } = world;
 
   // from center
   const [pointer, setPointer] = useImmer<Pointer | null>(null);
 
   const [drag, setDrag] = useImmer<DragState | null>(null);
+
+  // Compute pointer world position
+  const pointerWorld = useMemo(() => {
+    if (!pointer) return null;
+    return {
+      x: pointer.x / BASE_TILE_SIZE + camera.x,
+      y: pointer.y / BASE_TILE_SIZE + camera.y,
+    };
+  }, [pointer, camera]);
+
+  // Get hovered tile ID (only if on an entity)
+  const hoverTileId = useMemo((): TileId | null => {
+    if (!pointerWorld) return null;
+    const tileX = Math.floor(pointerWorld.x);
+    const tileY = Math.floor(pointerWorld.y);
+    const entityId = getEntityAtTile(chunks, tileX, tileY);
+    return entityId ? createTileId(tileX, tileY) : null;
+  }, [pointerWorld, chunks]);
+
+  // Compute preview path when hovering over different entity
+  const previewPath = useMemo((): TileId[] | null => {
+    if (!selectedTileId || !hoverTileId) return null;
+
+    const selectedPos = parseTileId(selectedTileId);
+    const hoverPos = parseTileId(hoverTileId);
+
+    const srcEntity = getEntityAtTile(chunks, selectedPos.x, selectedPos.y);
+    const dstEntity = getEntityAtTile(chunks, hoverPos.x, hoverPos.y);
+
+    if (!srcEntity || !dstEntity || srcEntity === dstEntity) return null;
+
+    return findPath(
+      chunks,
+      selectedTileId as TileId,
+      hoverTileId,
+      new Set([srcEntity, dstEntity]),
+    );
+  }, [selectedTileId, hoverTileId, chunks]);
 
   const handlePointerEnter = (e: CanvasPointerEvent) => {
     setPointer({ x: e.x, y: e.y, id: e.nativeEvent.pointerId });
@@ -79,44 +124,52 @@ function Index() {
       const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
 
       if (distance < DRAG_THRESHOLD) {
-        const worldX = e.x / BASE_TILE_SIZE + state.world.camera.x;
-        const worldY = e.y / BASE_TILE_SIZE + state.world.camera.y;
+        const worldX = e.x / BASE_TILE_SIZE + camera.x;
+        const worldY = e.y / BASE_TILE_SIZE + camera.y;
+        const tileX = Math.floor(worldX);
+        const tileY = Math.floor(worldY);
 
-        const clickedEntityId = findEntityAtPoint(state.world.chunks, {
-          x: worldX,
-          y: worldY,
-        });
+        const clickedEntityId = getEntityAtTile(chunks, tileX, tileY);
 
         if (clickedEntityId) {
-          updateState((draft) => {
-            if (draft.selectedEntityId === clickedEntityId) {
-              draft.selectedEntityId = null;
-            } else {
-              draft.selectedEntityId = clickedEntityId;
-            }
-          });
+          const clickedTileId = createTileId(tileX, tileY);
+
+          // If we have a preview path and clicking on a different entity, create connection
+          if (previewPath && previewPath.length > 1) {
+            updateState((draft) => {
+              connectTiles(draft.world, previewPath);
+              // Selection stays on source tile
+            });
+          } else {
+            // Toggle selection
+            updateState((draft) => {
+              if (draft.selectedTileId === clickedTileId) {
+                draft.selectedTileId = null;
+              } else {
+                draft.selectedTileId = clickedTileId;
+              }
+            });
+          }
         } else {
+          // Create new entity on empty space
           const width = 2;
           const height = 2;
           const topLeftX = Math.round(worldX - width / 2);
           const topLeftY = Math.round(worldY - height / 2);
 
           if (
-            !hasOverlappingEntity(state.world.chunks, {
+            !hasOverlappingEntity(chunks, {
               x: topLeftX,
               y: topLeftY,
             })
           ) {
             updateState((draft) => {
-              const newId = addEntity(draft.world, {
+              addEntity(draft.world, {
                 position: { x: topLeftX, y: topLeftY },
                 width,
                 height,
                 color: { h: Math.random() * 360, s: 100, l: 50 },
-                connections: {},
               });
-              connectEntities(draft.world, newId, draft.selectedEntityId ?? "0");
-              draft.selectedEntityId = newId;
             });
           }
         }
@@ -137,7 +190,13 @@ function Index() {
           onPointerDown={handlePointerDown}
           onPointerUp={handlePointerUp}
         >
-          {(size) => <WorldContainer size={size} pointer={pointer} />}
+          {(size) => (
+            <WorldContainer
+              size={size}
+              pointer={pointer}
+              previewPath={previewPath}
+            />
+          )}
         </SizeObserver>
       </div>
       <BottomBar />

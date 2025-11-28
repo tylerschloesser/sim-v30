@@ -1,4 +1,6 @@
-import type { Chunk } from "../state/AppStateContext";
+import type { Chunk, Tile } from "../state/AppStateContext";
+import type { TileId } from "./tileId";
+import { createTileId, parseTileId } from "./tileId";
 
 export const CHUNK_SIZE = 32;
 
@@ -56,7 +58,11 @@ export function setEntityOnTiles(
     const key = getChunkKey(pos.x, pos.y);
     const chunk = getOrCreateChunk(chunks, key);
     const index = getTileIndex(pos.x, pos.y);
-    chunk.tiles[index] = { entityId };
+    const existing = chunk.tiles[index];
+    chunk.tiles[index] = {
+      entityId,
+      connections: existing?.connections ?? {},
+    };
   }
 }
 
@@ -106,4 +112,46 @@ export function getEntityAtTile(
   if (!chunk) return null;
   const index = getTileIndex(tileX, tileY);
   return chunk.tiles[index]?.entityId ?? null;
+}
+
+/** Get tile at a specific position */
+export function getTile(
+  chunks: Record<string, Chunk>,
+  tileId: TileId,
+): Tile | null {
+  const { x, y } = parseTileId(tileId);
+  const key = getChunkKey(x, y);
+  const chunk = chunks[key];
+  if (!chunk) return null;
+  const index = getTileIndex(x, y);
+  return chunk.tiles[index];
+}
+
+/** Get or create tile at a specific position */
+export function getOrCreateTile(
+  chunks: Record<string, Chunk>,
+  tileId: TileId,
+): Tile {
+  const { x, y } = parseTileId(tileId);
+  const key = getChunkKey(x, y);
+  const chunk = getOrCreateChunk(chunks, key);
+  const index = getTileIndex(x, y);
+
+  if (!chunk.tiles[index]) {
+    chunk.tiles[index] = { connections: {} };
+  }
+  return chunk.tiles[index]!;
+}
+
+/** Get TileId from chunk key and local index */
+export function getTileIdFromChunkIndex(
+  chunkKey: string,
+  index: number,
+): TileId {
+  const [chunkX, chunkY] = chunkKey.split(",").map(Number);
+  const localX = index % CHUNK_SIZE;
+  const localY = Math.floor(index / CHUNK_SIZE);
+  const tileX = chunkX * CHUNK_SIZE + localX;
+  const tileY = chunkY * CHUNK_SIZE + localY;
+  return createTileId(tileX, tileY);
 }

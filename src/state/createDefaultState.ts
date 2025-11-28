@@ -15,7 +15,6 @@ export function createDefaultWorld(): World {
     width: 2,
     height: 2,
     color: { h: 220, s: 100, l: 50 },
-    connections: {},
   });
 
   return world;
@@ -24,6 +23,6 @@ export function createDefaultWorld(): World {
 export function createDefaultState(): AppState {
   return {
     world: createDefaultWorld(),
-    selectedEntityId: null,
+    selectedTileId: null,
   };
 }
