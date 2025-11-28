@@ -11,7 +11,7 @@ export function createDefaultWorld(): World {
 
   addEntity(world, {
     position: { x: 0, y: 0 },
-    radius: 32,
+    radius: 1,
     color: { h: 220, s: 100, l: 50 },
     connections: {},
   });

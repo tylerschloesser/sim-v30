@@ -15,21 +15,24 @@ interface WorldContainerProps {
   scale?: number;
 }
 
+export const BASE_TILE_SIZE = 32;
+
 export function findEntityAtPoint(
   entities: Record<string, Entity>,
   point: { x: number; y: number }
 ): string | null {
+  const tileX = point.x / BASE_TILE_SIZE;
+  const tileY = point.y / BASE_TILE_SIZE;
+
   return (
     Object.values(entities).find((entity) => {
-      const dx = point.x - entity.position.x;
-      const dy = point.y - entity.position.y;
+      const dx = tileX - entity.position.x;
+      const dy = tileY - entity.position.y;
       const distance = Math.sqrt(dx * dx + dy * dy);
       return distance <= entity.radius;
     })?.id ?? null
   );
 }
-
-const BASE_CELL_SIZE = 32;
 
 interface ConnectionLine {
   id: string;
@@ -48,7 +51,7 @@ export function WorldContainer({
   const { world, selectedEntityId } = state;
   const { camera, entities } = world;
 
-  const cellSize = BASE_CELL_SIZE * scale;
+  const tileSize = BASE_TILE_SIZE * scale;
   const patternId = `dot-grid-${scale}`;
 
   const scaledCamera = useMemo(
@@ -68,11 +71,11 @@ export function WorldContainer({
   );
 
   const gridX =
-    Math.floor((scaledCamera.x - size.width / 2) / cellSize) * cellSize -
-    cellSize;
+    Math.floor((scaledCamera.x - size.width / 2) / tileSize) * tileSize -
+    tileSize;
   const gridY =
-    Math.floor((scaledCamera.y - size.height / 2) / cellSize) * cellSize -
-    cellSize;
+    Math.floor((scaledCamera.y - size.height / 2) / tileSize) * tileSize -
+    tileSize;
 
   const connectionLines = useMemo(() => {
     const lines: ConnectionLine[] = [];
@@ -113,13 +116,13 @@ export function WorldContainer({
       <defs>
         <pattern
           id={patternId}
-          width={cellSize}
-          height={cellSize}
+          width={tileSize}
+          height={tileSize}
           patternUnits="userSpaceOnUse"
         >
           <circle
-            cx={cellSize / 2}
-            cy={cellSize / 2}
+            cx={tileSize / 2}
+            cy={tileSize / 2}
             r={1.5 * scale}
             fill="#ccc"
           />
@@ -131,16 +134,16 @@ export function WorldContainer({
         <rect
           x={gridX}
           y={gridY}
-          width={size.width + cellSize * 2}
-          height={size.height + cellSize * 2}
+          width={size.width + tileSize * 2}
+          height={size.height + tileSize * 2}
           fill={`url(#${patternId})`}
         />
         {Object.values(entities).map((entity) => (
           <circle
             key={entity.id}
-            cx={entity.position.x * scale}
-            cy={entity.position.y * scale}
-            r={entity.radius * scale}
+            cx={entity.position.x * tileSize}
+            cy={entity.position.y * tileSize}
+            r={entity.radius * tileSize}
             fill={`hsl(${entity.color.h}, ${entity.color.s}%, ${entity.color.l}%)`}
             stroke={
               selectedEntityId === entity.id
@@ -155,10 +158,10 @@ export function WorldContainer({
         {connectionLines.map((line) => (
           <line
             key={line.id}
-            x1={line.x1 * scale}
-            y1={line.y1 * scale}
-            x2={line.x2 * scale}
-            y2={line.y2 * scale}
+            x1={line.x1 * tileSize}
+            y1={line.y1 * tileSize}
+            x2={line.x2 * tileSize}
+            y2={line.y2 * tileSize}
             stroke="#000"
             strokeWidth={2 * scale}
           />
@@ -167,7 +170,7 @@ export function WorldContainer({
           <circle
             cx={pointerWorld.x}
             cy={pointerWorld.y}
-            r={cellSize / 2}
+            r={tileSize / 2}
             fill="red"
           />
         )}

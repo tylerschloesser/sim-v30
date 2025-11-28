@@ -8,6 +8,7 @@ import {
 import {
   WorldContainer,
   findEntityAtPoint,
+  BASE_TILE_SIZE,
   type Pointer,
 } from "../components/WorldContainer";
 import { useAppState } from "../hooks/useAppState";
@@ -100,8 +101,8 @@ function Index() {
         } else {
           updateState((draft) => {
             const newId = addEntity(draft.world, {
-              position: { x: worldX, y: worldY },
-              radius: 16,
+              position: { x: worldX / BASE_TILE_SIZE, y: worldY / BASE_TILE_SIZE },
+              radius: 0.5,
               color: { h: Math.random() * 360, s: 100, l: 50 },
               connections: {},
             });
