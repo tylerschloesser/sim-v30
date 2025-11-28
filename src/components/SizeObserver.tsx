@@ -16,7 +16,6 @@ export interface Size {
 export interface CanvasPointerEvent {
   x: number;
   y: number;
-  size: Size;
   nativeEvent: PointerEvent;
 }
 
@@ -39,7 +38,7 @@ export function SizeObserver({
 }: SizeObserverProps) {
   const ref = useRef<HTMLDivElement>(null);
   const rect = useRect(ref);
-  const size = useMemo(() => {
+  const size = useMemo<Size>(() => {
     return { width: rect.width, height: rect.height };
   }, [rect.width, rect.height]);
 
@@ -50,9 +49,8 @@ export function SizeObserver({
       invariant(ref.current);
       const rect = ref.current.getBoundingClientRect();
       return {
-        x: e.clientX - rect.left,
-        y: e.clientY - rect.top,
-        size,
+        x: e.clientX - rect.left - size.width / 2,
+        y: e.clientY - rect.top - size.height / 2,
         nativeEvent: e,
       };
     };

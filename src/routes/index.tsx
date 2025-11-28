@@ -24,7 +24,10 @@ interface DragState {
 
 function Index() {
   const { state, updateState } = useAppState();
+
+  // from center
   const [pointer, setPointer] = useImmer<Pointer | null>(null);
+
   const [drag, setDrag] = useImmer<DragState | null>(null);
 
   const handlePointerEnter = (e: CanvasPointerEvent) => {
@@ -74,8 +77,8 @@ function Index() {
       const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
 
       if (distance < DRAG_THRESHOLD) {
-        const worldX = e.x - e.size.width / 2 + state.camera.x;
-        const worldY = e.y - e.size.height / 2 + state.camera.y;
+        const worldX = e.x + state.camera.x;
+        const worldY = e.y + state.camera.y;
 
         updateState((draft) => {
           const newId = String(draft.nextEntityId);

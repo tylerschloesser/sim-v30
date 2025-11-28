@@ -39,8 +39,8 @@ export function WorldContainer({
 
   const pointerWorld = pointer
     ? {
-        x: pointer.x - size.width / 2 + scaledCamera.x,
-        y: pointer.y - size.height / 2 + scaledCamera.y,
+        x: pointer.x + scaledCamera.x,
+        y: pointer.y + scaledCamera.y,
       }
     : null;
 
