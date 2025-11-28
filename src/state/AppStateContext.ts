@@ -21,6 +21,23 @@ export const HSLSchema = z.strictObject({
 
 export const ItemTypeSchema = z.enum(["iron", "copper", "stone"]);
 
+export const EntityStateSchema = z.discriminatedUnion("type", [
+  z.strictObject({ type: z.literal("idle") }),
+  z.strictObject({
+    type: z.literal("mine"),
+    progress: z.number(),
+    itemType: ItemTypeSchema,
+  }),
+]);
+
+export const InventorySchema = z
+  .object({
+    iron: z.number().optional(),
+    copper: z.number().optional(),
+    stone: z.number().optional(),
+  })
+  .default({});
+
 export const TileSchema = z.strictObject({
   entityId: z.string().optional(),
   connections: z.record(z.string(), z.literal(true)).default({}),
@@ -37,6 +54,8 @@ export const EntitySchema = z.strictObject({
   width: z.number().int(),
   height: z.number().int(),
   color: HSLSchema,
+  state: EntityStateSchema,
+  inventory: InventorySchema,
 });
 
 export const WorldSchema = z.strictObject({
@@ -56,6 +75,8 @@ export type Camera = z.infer<typeof CameraSchema>;
 export type Position = z.infer<typeof PositionSchema>;
 export type HSL = z.infer<typeof HSLSchema>;
 export type ItemType = z.infer<typeof ItemTypeSchema>;
+export type EntityState = z.infer<typeof EntityStateSchema>;
+export type Inventory = z.infer<typeof InventorySchema>;
 export type Tile = z.infer<typeof TileSchema>;
 export type Chunk = z.infer<typeof ChunkSchema>;
 export type Entity = z.infer<typeof EntitySchema>;
@@ -76,12 +97,22 @@ export function getEntityCenter(entity: Entity): Position {
   };
 }
 
-export function createEntity(world: World, props: Omit<Entity, "id">): Entity {
+type CreateEntityProps = Omit<Entity, "id" | "state" | "inventory"> & {
+  state?: Entity["state"];
+  inventory?: Entity["inventory"];
+};
+
+export function createEntity(world: World, props: CreateEntityProps): Entity {
   const id = String(world.nextEntityId);
-  return { id, ...props };
+  return {
+    id,
+    ...props,
+    state: props.state ?? { type: "idle" },
+    inventory: props.inventory ?? {},
+  };
 }
 
-export function addEntity(world: World, props: Omit<Entity, "id">): string {
+export function addEntity(world: World, props: CreateEntityProps): string {
   const entity = createEntity(world, props);
   world.entities[entity.id] = entity;
   world.nextEntityId++;

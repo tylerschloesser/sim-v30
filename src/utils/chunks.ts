@@ -1,4 +1,4 @@
-import type { Chunk, Tile } from "../state/AppStateContext";
+import type { Chunk, ItemType, Tile } from "../state/AppStateContext";
 import type { TileId } from "./tileId";
 import { createTileId, parseTileId } from "./tileId";
 
@@ -155,4 +155,25 @@ export function getTileIdFromChunkIndex(
   const tileX = chunkX * CHUNK_SIZE + localX;
   const tileY = chunkY * CHUNK_SIZE + localY;
   return createTileId(tileX, tileY);
+}
+
+/** Get all resource types on tiles occupied by a 2x2 entity */
+export function getResourcesOnEntity(
+  chunks: Record<string, Chunk>,
+  x: number,
+  y: number,
+): ItemType[] {
+  const resources: ItemType[] = [];
+  for (const pos of getEntityTilePositions(x, y)) {
+    const key = getChunkKey(pos.x, pos.y);
+    const chunk = chunks[key];
+    if (chunk) {
+      const index = getTileIndex(pos.x, pos.y);
+      const tile = chunk.tiles[index];
+      if (tile?.itemType) {
+        resources.push(tile.itemType);
+      }
+    }
+  }
+  return resources;
 }
