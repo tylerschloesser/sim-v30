@@ -35,14 +35,21 @@ export function WorldContainer({
   const cellSize = BASE_CELL_SIZE * scale;
   const patternId = `dot-grid-${scale}`;
 
-  const scaledCamera = { x: camera.x * scale, y: camera.y * scale };
+  const scaledCamera = useMemo(
+    () => ({ x: camera.x * scale, y: camera.y * scale }),
+    [camera, scale],
+  );
 
-  const pointerWorld = pointer
-    ? {
-        x: pointer.x + scaledCamera.x,
-        y: pointer.y + scaledCamera.y,
-      }
-    : null;
+  const pointerWorld = useMemo(
+    () =>
+      pointer
+        ? {
+            x: pointer.x + scaledCamera.x,
+            y: pointer.y + scaledCamera.y,
+          }
+        : null,
+    [pointer, scaledCamera],
+  );
 
   const gridX =
     Math.floor((scaledCamera.x - size.width / 2) / cellSize) * cellSize -
@@ -80,6 +87,18 @@ export function WorldContainer({
     return lines;
   }, [state.entities]);
 
+  const hoverEntityId = useMemo(() => {
+    if (!pointerWorld) return null;
+    return (
+      Object.values(state.entities).find((entity) => {
+        const dx = pointerWorld.x - entity.position.x;
+        const dy = pointerWorld.y - entity.position.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        return distance <= entity.radius;
+      })?.id ?? null
+    );
+  }, [pointerWorld, state.entities]);
+
   return (
     <svg className="w-full h-full">
       <defs>
@@ -114,7 +133,7 @@ export function WorldContainer({
             cy={entity.position.y * scale}
             r={entity.radius * scale}
             fill={`hsl(${entity.color.h}, ${entity.color.s}%, ${entity.color.l}%)`}
-            stroke="#000"
+            stroke={hoverEntityId === entity.id ? "#ff0" : "#000"}
             strokeWidth={2 * scale}
           />
         ))}
@@ -129,7 +148,7 @@ export function WorldContainer({
             strokeWidth={2 * scale}
           />
         ))}
-        {pointerWorld && (
+        {!hoverEntityId && pointerWorld && (
           <circle
             cx={pointerWorld.x}
             cy={pointerWorld.y}
