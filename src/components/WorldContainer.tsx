@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import type { Size } from "./SizeObserver";
 import { useAppState } from "../hooks/useAppState";
 import { BASE_TILE_SIZE } from "../constants";
-import { findEntityAtPoint } from "../utils/world";
+import { findEntityAtPoint, hasOverlappingEntity } from "../utils/world";
 import { getEntityCenter } from "../state/AppStateContext";
 
 export interface Pointer {
@@ -97,6 +97,16 @@ export function WorldContainer({
     return findEntityAtPoint(entities, pointerWorld);
   }, [pointerWorld, entities]);
 
+  const previewOverlaps = useMemo(() => {
+    if (!pointerWorld) return false;
+    return hasOverlappingEntity(entities, {
+      x: Math.round(pointerWorld.x - 1),
+      y: Math.round(pointerWorld.y - 1),
+      width: 2,
+      height: 2,
+    });
+  }, [pointerWorld, entities]);
+
   return (
     <svg className="w-full h-full">
       <defs>
@@ -153,7 +163,7 @@ export function WorldContainer({
             strokeWidth={2 * scale}
           />
         ))}
-        {!hoverEntityId && pointerWorld && (
+        {!hoverEntityId && !previewOverlaps && pointerWorld && (
           <rect
             x={Math.round(pointerWorld.x - 1) * tileSize}
             y={Math.round(pointerWorld.y - 1) * tileSize}
