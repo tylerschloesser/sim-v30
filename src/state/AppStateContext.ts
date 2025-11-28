@@ -1,5 +1,6 @@
 import { createContext } from "react";
 import { z } from "zod";
+import { invariant } from "../utils/invariant";
 
 export const CameraSchema = z.strictObject({
   x: z.number(),
@@ -66,10 +67,11 @@ export function connectEntities(
 ): void {
   const entityA = state.entities[idA];
   const entityB = state.entities[idB];
-  if (entityA && entityB && idA !== idB) {
-    entityA.connections[idB] = true;
-    entityB.connections[idA] = true;
-  }
+  invariant(entityA, `Entity ${idA} does not exist`);
+  invariant(entityB, `Entity ${idB} does not exist`);
+  invariant(idA !== idB, `Cannot connect entity ${idA} to itself`);
+  entityA.connections[idB] = true;
+  entityB.connections[idA] = true;
 }
 
 export function disconnectEntities(

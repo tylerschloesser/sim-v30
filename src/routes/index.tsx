@@ -102,7 +102,7 @@ function Index() {
               color: { h: Math.random() * 360, s: 100, l: 50 },
               connections: {},
             });
-            connectEntities(draft, newId, "0");
+            connectEntities(draft, newId, selectedEntityId ?? "0");
           });
         }
       }
