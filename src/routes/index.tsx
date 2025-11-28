@@ -82,7 +82,7 @@ function Index() {
         const worldX = e.x / BASE_TILE_SIZE + state.world.camera.x;
         const worldY = e.y / BASE_TILE_SIZE + state.world.camera.y;
 
-        const clickedEntityId = findEntityAtPoint(state.world.entities, {
+        const clickedEntityId = findEntityAtPoint(state.world.chunks, {
           x: worldX,
           y: worldY,
         });
@@ -102,11 +102,9 @@ function Index() {
           const topLeftY = Math.round(worldY - height / 2);
 
           if (
-            !hasOverlappingEntity(state.world.entities, {
+            !hasOverlappingEntity(state.world.chunks, {
               x: topLeftX,
               y: topLeftY,
-              width,
-              height,
             })
           ) {
             updateState((draft) => {

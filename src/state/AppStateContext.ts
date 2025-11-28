@@ -1,5 +1,6 @@
 import { createContext } from "react";
 import { z } from "zod";
+import { setEntityOnTiles } from "../utils/chunks";
 import { invariant } from "../utils/invariant";
 
 export const CameraSchema = z.strictObject({
@@ -18,6 +19,14 @@ export const HSLSchema = z.strictObject({
   l: z.number(),
 });
 
+export const TileSchema = z.strictObject({
+  entityId: z.string(),
+});
+
+export const ChunkSchema = z.strictObject({
+  tiles: z.array(TileSchema.nullable()),
+});
+
 export const EntitySchema = z.strictObject({
   id: z.string(),
   position: PositionSchema,
@@ -31,6 +40,7 @@ export const WorldSchema = z.strictObject({
   tick: z.number(),
   camera: CameraSchema,
   entities: z.record(z.string(), EntitySchema),
+  chunks: z.record(z.string(), ChunkSchema),
   nextEntityId: z.number(),
 });
 
@@ -42,6 +52,8 @@ export const AppStateSchema = z.strictObject({
 export type Camera = z.infer<typeof CameraSchema>;
 export type Position = z.infer<typeof PositionSchema>;
 export type HSL = z.infer<typeof HSLSchema>;
+export type Tile = z.infer<typeof TileSchema>;
+export type Chunk = z.infer<typeof ChunkSchema>;
 export type Entity = z.infer<typeof EntitySchema>;
 export type World = z.infer<typeof WorldSchema>;
 export type AppState = z.infer<typeof AppStateSchema>;
@@ -69,6 +81,12 @@ export function addEntity(world: World, props: Omit<Entity, "id">): string {
   const entity = createEntity(world, props);
   world.entities[entity.id] = entity;
   world.nextEntityId++;
+  setEntityOnTiles(
+    world.chunks,
+    entity.id,
+    entity.position.x,
+    entity.position.y,
+  );
   return entity.id;
 }
 

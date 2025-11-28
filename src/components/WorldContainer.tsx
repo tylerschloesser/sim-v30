@@ -32,7 +32,7 @@ export function WorldContainer({
 }: WorldContainerProps) {
   const { state } = useAppState();
   const { world, selectedEntityId } = state;
-  const { camera, entities } = world;
+  const { camera, entities, chunks } = world;
 
   const tileSize = BASE_TILE_SIZE * scale;
   const patternId = `dot-grid-${scale}`;
@@ -94,18 +94,16 @@ export function WorldContainer({
 
   const hoverEntityId = useMemo(() => {
     if (!pointerWorld) return null;
-    return findEntityAtPoint(entities, pointerWorld);
-  }, [pointerWorld, entities]);
+    return findEntityAtPoint(chunks, pointerWorld);
+  }, [pointerWorld, chunks]);
 
   const previewOverlaps = useMemo(() => {
     if (!pointerWorld) return false;
-    return hasOverlappingEntity(entities, {
+    return hasOverlappingEntity(chunks, {
       x: Math.round(pointerWorld.x - 1),
       y: Math.round(pointerWorld.y - 1),
-      width: 2,
-      height: 2,
     });
-  }, [pointerWorld, entities]);
+  }, [pointerWorld, chunks]);
 
   return (
     <svg className="w-full h-full">

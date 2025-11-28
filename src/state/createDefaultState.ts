@@ -7,6 +7,7 @@ export function createDefaultWorld(): World {
     camera: { x: 0, y: 0 },
     nextEntityId: 0,
     entities: {},
+    chunks: {},
   };
 
   addEntity(world, {
