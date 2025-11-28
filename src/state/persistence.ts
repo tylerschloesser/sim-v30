@@ -1,7 +1,7 @@
 import type { AppState, World } from "./AppStateContext";
 import { WorldSchema, validateEntities } from "./AppStateContext";
 
-const STORAGE_KEY = "sim-v30-app-state";
+const STORAGE_KEY = "sim-v30-world";
 
 export function saveState(state: AppState): boolean {
   try {
